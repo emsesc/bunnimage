@@ -19,27 +19,27 @@ module.exports = async function (context, eventGridEvent, inputBlob) {
     jobId = result.id
 
     status = false;
-    while (!status) {
-        update = await checkStatus(jobId);
-        context.log("<------Trying-------->")
-        context.log(update);
-        if (update.status.code == "completed") {
-            context.log("[!] Image done converting")
-            status = true
-            uri = update.output[0].uri;
-            filename = update.output[0].filename;
-            context.log("Download URL: " + uri);
-            context.log("Donwload file: " + filename);
+    try {
+        while (!status) {
+            update = await checkStatus(jobId);
+            context.log("<------Trying-------->")
+            context.log(update);
+            if (update.status.code == "completed") {
+                context.log("[!] Image done converting")
+                status = true
+                uri = update.output[0].uri;
+                filename = update.output[0].filename;
+                context.log("Download URL: " + uri);
+                context.log("Donwnload file: " + filename);
+            }
         }
     }
-    
-    input = {
-        "fname" : filename,
+    catch (e) {
+        context.log("[!!!] Daily Conversions Reached");
+        context.done();
     }
 
-    var json = JSON.stringify(input);
-
-    // url = "https://www22.online-convert.com/dl/web7/download-file/ba0bc036-73a6-4bce-9230-1d0394224da1/thumbn.pdf"
+    //url = "https://www22.online-convert.com/dl/web7/download-file/ba0bc036-73a6-4bce-9230-1d0394224da1/thumbn.pdf"
 
     let resp = await fetch(uri, {
         method: 'GET',
@@ -48,11 +48,11 @@ module.exports = async function (context, eventGridEvent, inputBlob) {
     let data = await resp.buffer();
     context.log(data);
     // let newfile = await uploadBlob(data, filename);
-    context.bindings.outputBlob = data;
-    
+    const uploadStatus = await uploadBlob(data, filename);
+    context.log("[!] Uploading to pdfs container...")
+    context.log(uploadStatus);
     context.log("<----------------END---------------------->")
-    context.log(json);
-    context.done(null, json);
+    context.done();
 };
     
 
@@ -132,16 +132,16 @@ async function uploadBlob(pdf, filename){
     const blobName = filename;
     // get block blob client
     const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-    const uploadBlobResponse = await blockBlobClient.upload(pdf[0], pdf[0].length);
+    const uploadBlobResponse = await blockBlobClient.upload(pdf, pdf.length);
     console.log(`Upload block blob ${blobName} successfully`, uploadBlobResponse.requestId);
     result = {
         body : {
             name : blobName, 
-            type: pdf[0].type,
-            data: pdf[0].data.length,
-            success: true,
-            filetype: filetype
+            type: pdf.type,
+            data: pdf.length,
+            success: true
         }
     };
     return result;
 }
+
