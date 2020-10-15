@@ -1,33 +1,58 @@
-const { BlobServiceClient } = require("@azure/storage-blob");
+var download = require('download-file')
+var multipart = require("parse-multipart");
 var fetch = require("node-fetch");
-
-const connectionstring = process.env["AZURE_STORAGE_CONNECTION_STRING"]
+const { BlobServiceClient } = require("@azure/storage-blob");
+const connectionstring = process.env["AZURE_STORAGE_CONNECTION_STRING"];
+const account = "storageaccountbunnib914";
 
 module.exports = async function (context, eventGridEvent, inputBlob) {
     context.log("<----------------START----------------------->")
+    
     const blobUrl = context.bindingData.data.url;
     const blobName = blobUrl.slice(blobUrl.lastIndexOf("/")+1);
     // get blob url and name
     context.log(`Blob Url: ${blobUrl}`);
-    context.log(eventGridEvent);
+    //context.log(eventGridEvent);
     context.log(`Image that was uploaded: ${blobName}`);
-    context.log("<----------------END---------------------->")
-
-    result = await convertImage(blobName);
+    
+    var result = await convertImage(blobName);
     jobId = result.id
 
     status = false;
-    while (status == false) {
+    while (!status) {
         update = await checkStatus(jobId);
+        context.log("<------Trying-------->")
         context.log(update);
         if (update.status.code == "completed") {
-            context.log(update.status.code);
+            context.log("[!] Image done converting")
             status = true
-            uri = update.output.uri;
-            context.log(uri);
+            uri = update.output[0].uri;
+            filename = update.output[0].filename;
+            context.log("Download URL: " + uri);
+            context.log("Donwload file: " + filename);
         }
     }
-    context.done();
+    
+    input = {
+        "fname" : filename,
+    }
+
+    var json = JSON.stringify(input);
+
+    // url = "https://www22.online-convert.com/dl/web7/download-file/ba0bc036-73a6-4bce-9230-1d0394224da1/thumbn.pdf"
+
+    let resp = await fetch(uri, {
+        method: 'GET',
+    })
+
+    let data = await resp.buffer();
+    context.log(data);
+    // let newfile = await uploadBlob(data, filename);
+    context.bindings.outputBlob = data;
+    
+    context.log("<----------------END---------------------->")
+    context.log(json);
+    context.done(null, json);
 };
     
 
@@ -59,9 +84,6 @@ async function convertImage(blobName){
 
     // making the post request
     let resp = await fetch(uriBase, {
-        /*The await expression causes async function execution to pause until a Promise is settled 
-        (that is, fulfilled or rejected), and to resume execution of the async function after fulfillment. 
-        When resumed, the value of the await expression is that of the fulfilled Promise*/
         method: 'POST',
         body: payload,
         // we want to send the image
@@ -83,6 +105,7 @@ async function checkStatus(jobId){
     const uriBase = "https://api2.online-convert.com/jobs";
 	// env variables (similar to .gitignore/.env file) to not expose personal info
 
+    // making the post request
     let resp = await fetch(uriBase + "/" + jobId, {
         /*The await expression causes async function execution to pause until a Promise is settled 
         (that is, fulfilled or rejected), and to resume execution of the async function after fulfillment. 
@@ -97,4 +120,28 @@ async function checkStatus(jobId){
     let data = await resp.json();
 
     return data;
+}
+
+async function uploadBlob(pdf, filename){
+    // create blobserviceclient object that is used to create container client
+    const blobServiceClient = await BlobServiceClient.fromConnectionString(connectionstring);
+    // get reference to a container
+    const container = "pdfs";
+    const containerClient = await blobServiceClient.getContainerClient(container);
+    // create blob name
+    const blobName = filename;
+    // get block blob client
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+    const uploadBlobResponse = await blockBlobClient.upload(pdf[0], pdf[0].length);
+    console.log(`Upload block blob ${blobName} successfully`, uploadBlobResponse.requestId);
+    result = {
+        body : {
+            name : blobName, 
+            type: pdf[0].type,
+            data: pdf[0].data.length,
+            success: true,
+            filetype: filetype
+        }
+    };
+    return result;
 }
