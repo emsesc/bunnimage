@@ -4,6 +4,7 @@ Week 4 - Week 8 **BitCamp** project that utilizes **Microsoft Azure Functions** 
 
 ![enter image description here](https://github.com/emsesc/bunnimage/blob/main/img/logo.png)
 
+Note: Currently the Functions are disabled and therefore the project is not currently up and running.
 
 # Website
 
