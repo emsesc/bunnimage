@@ -8,7 +8,7 @@ async function handle(event) {
 
     var myform = document.getElementById("image-form");
         console.log("Attempting to get your pdf...");
-        const resp = await fetch("https://bunnimage2.azurewebsites.net/api/downloadImage?code=IkMtrB3kBAV1Rea1Qex0K9prmJ8rQ4oC16hwXSGufxqxcafHXCjHng==", {
+        const resp = await fetch("https://bunnimage1.azurewebsites.net/api/downloadTrigger?code=ryCKYqZQJpiq9bagb4Nmifbg6pFZvcyfsNmF4GEybYaL68bGsbdrNA==", {
             method: 'GET',
             headers: {
                 'username' : username
