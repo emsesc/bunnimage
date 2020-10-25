@@ -1,8 +1,7 @@
 var multipart = require("parse-multipart");
 const { BlobServiceClient } = require("@azure/storage-blob");
-const FileType = require('file-type');
 const connectionstring = process.env["AZURE_STORAGE_CONNECTION_STRING"];
-const account = "storageaccountbunnib914";
+const account = "bunnimagestorage";
 
 module.exports = async function (context, req) {
     context.log('JavaScript HTTP trigger function processed a request.');

@@ -1,9 +1,8 @@
-var download = require('download-file')
 var multipart = require("parse-multipart");
 var fetch = require("node-fetch");
 const { BlobServiceClient } = require("@azure/storage-blob");
 const connectionstring = process.env["AZURE_STORAGE_CONNECTION_STRING"];
-const account = "storageaccountbunnib914";
+const account = "bunnimagestorage";
 
 module.exports = async function (context, eventGridEvent, inputBlob) {
     context.log("<----------------START----------------------->")
@@ -31,6 +30,9 @@ module.exports = async function (context, eventGridEvent, inputBlob) {
                 filename = update.output[0].filename;
                 context.log("Download URL: " + uri);
                 context.log("Donwnload file: " + filename);
+            } else if (update.status.info == "The file has not been converted due to errors."){
+                context.log("[!!!] AccountKey is incorrect")
+                context.done();
             }
         }
     }
@@ -74,7 +76,7 @@ async function convertImage(blobName){
             "file": blobName
         },
         "credentials": {
-            "accountname": "storageaccountbunnib914",
+            "accountname": "bunnimagestorage",
             "accountkey": accountKey
         }
     }]

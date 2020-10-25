@@ -3,7 +3,7 @@ module.exports = async function (context, req, inputBlob) {
     context.log('JavaScript HTTP trigger function processed a request.');
 
     var username = req.headers['username'];
-    var download = "https://storageaccountbunnib914.blob.core.windows.net/pdfs/" + username + ".pdf";
+    var download = "https://bunnimagestorage.blob.core.windows.net/pdfs/" + username + ".pdf";
     
     let resp = await fetch(download, {
         method: 'GET',
