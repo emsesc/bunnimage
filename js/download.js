@@ -26,10 +26,22 @@ async function handle(event) {
           $('#submit').html(`Your file named ${username}.pdf has not been converted yet. Please continue refreshing!`)
         } else {
           $('#submit').html(`Found ${username}.pdf! Click to Download.`);
-          document.getElementById('getLink').setAttribute('onclick',`window.open('${link}')`);
+          document.getElementById('getLink').setAttribute('onclick',`deletePdf("${link}", "${username}")`);
           document.getElementById("getLink").style.visibility = "visible";
           var element = document.getElementById("refresh");
           element.parentNode.removeChild(element);
           document.getElementById("upload").src = "img/downloadsuccess.gif";
         }
+}
+
+async function deletePdf(link, username) {
+  window.open(link);
+  const response = await fetch("https://bunnimage1.azurewebsites.net/api/deletePDF?code=ycWOjABK17rneifTcCDD/4fipiWiX3jxOkMXIgLQYtGMFAhMksQC9g==", {
+            method: 'GET',
+            headers: {
+                'file' : username + ".pdf"
+            },
+        });
+
+  var data = await response.json();
 }
