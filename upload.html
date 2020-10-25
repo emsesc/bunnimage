@@ -96,9 +96,37 @@
                                     <h3>Time to upload!</h3>
                                     <p>Submit your image here by attaching your file AND typing in your username. Remember to have the "download" page open on your receiving device!</p>
                                     <form id="image-form" onsubmit="handle(event)" enctype="multipart/form-data">
-                                      <input class="label" type="file" onChange="loadFile(event)" accept="image/x-png,image/jpeg" name="image"></input>
+                                      <input id="fileupload" class="label" type="file" onChange="loadFile(event)" accept="image/x-png,image/jpeg" name="files[]" multiple></input>
                                       <img id="output" 
                                       class="img-fluid" src="img/logo.png"></img>
+                                      <div id="preview"></div>
+                                      <script language="javascript" type="text/javascript">
+                                          window.onload = function () {
+                                              var fileUpload = document.getElementById("fileupload");
+                                              fileUpload.onchange = function () {
+                                                  if (typeof (FileReader) != "undefined") {
+                                                      var dvPreview = document.getElementById("preview");
+                                                      dvPreview.src = "";
+                                                      var element = document.getElementById("output");element.parentNode.removeChild(element);
+                                                      for (var i = 0; i < fileUpload.files.length; i++) {
+                                                          var file = fileUpload.files[i];
+                                                              var reader = new FileReader();
+                                                              reader.onload = function (e) {
+                                                                  var img = document.createElement("IMG");
+                                                                  img.height = "200";
+                                                                  img.width = "200";
+                                                                  img.style = "border:5px; border-radius: 25px"
+                                                                  img.src = e.target.result;
+                                                                  dvPreview.appendChild(img);
+                                                              }
+                                                              reader.readAsDataURL(file);
+                                                      }
+                                                  } else {
+                                                      alert("This browser does not support HTML5 FileReader.");
+                                                  }
+                                              }
+                                          };
+                                        </script>
                                       <br></br>
                                       <input id="username" type="text" class="form-control" placeholder="Enter valid username">
                                       <br></br>
