@@ -44,4 +44,5 @@ async function deletePdf(link, username) {
         });
 
   var data = await response.json();
+  document.getElementById("getLink").disabled = true;
 }
