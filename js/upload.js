@@ -1,4 +1,4 @@
-function loadFile(event){
+async function loadFile(event){
     console.log("Got picture!");
     var image = document.getElementById("output");
     // Get image from output 
