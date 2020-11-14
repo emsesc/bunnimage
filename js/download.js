@@ -26,7 +26,7 @@ async function handle(event) {
           $('#submit').html(`Your file named ${username}.pdf has not been converted yet. Please continue refreshing!`)
         } else {
           $('#submit').html(`Found ${username}.pdf! Click to Download.`);
-          document.getElementById('getLink').setAttribute('onclick',`deletePdf("${link}", "${username}")`);
+          document.getElementById('getLink').setAttribute('onclick',`getPdf("${link}", "${username}")`);
           document.getElementById("getLink").style.visibility = "visible";
           var element = document.getElementById("refresh");
           element.parentNode.removeChild(element);
@@ -34,15 +34,34 @@ async function handle(event) {
         }
 }
 
-async function deletePdf(link, username) {
+function getPdf(link, username) {
   window.open(link);
+  document.getElementById("getLink").disabled = true;
+  var currentdate = new Date(); 
+  var datetime = currentdate.getDate() + "/"
+                + (currentdate.getMonth()+1)  + "/" 
+                + currentdate.getFullYear() + " @ "  
+                + currentdate.getHours() + ":"  
+                + currentdate.getMinutes() + ":" 
+                + currentdate.getSeconds();
+  console.log("Downloaded: " + datetime);
+  setTimeout(function() { deletePdf(username); }, 10000);
+}
+
+async function deletePdf(username) {
   const response = await fetch("https://bunnimage1.azurewebsites.net/api/deletePDF?code=ycWOjABK17rneifTcCDD/4fipiWiX3jxOkMXIgLQYtGMFAhMksQC9g==", {
             method: 'GET',
             headers: {
                 'file' : username + ".pdf"
             },
         });
-
   var data = await response.json();
-  document.getElementById("getLink").disabled = true;
+  var currentdate = new Date(); 
+  var datetime = currentdate.getDate() + "/"
+                + (currentdate.getMonth()+1)  + "/" 
+                + currentdate.getFullYear() + " @ "  
+                + currentdate.getHours() + ":"  
+                + currentdate.getMinutes() + ":" 
+                + currentdate.getSeconds();
+  console.log("Deleted " + datetime);
 }
