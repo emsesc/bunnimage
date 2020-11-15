@@ -6,7 +6,7 @@
 I wanted to create a project that was useful and applicable to 2020 as well as the future. This application was made with intentions of alleviating stress of tired high schoolers, but can also be used for those working at home. *However, it is arguable that creating this web app increased my stress levels, but we don't talk about that.*
 **Essentially, *Bunnimage* takes an image as an input on an *upload* page, converts it into a PDF and is available at a *download* page. You can open the webpage on your phone and laptop, or really anywhere you need to send and receive an image.**
 
-### Here's an overview of what it does (excluding the optional deletion part)
+### Here's an overview of what it does (excluding the optional deletion part) and here's [my repo](https://github.com/emsesc/bunnimage)
 ![image](https://user-images.githubusercontent.com/69332964/99191176-01198180-2739-11eb-9889-872822df6bd8.png)
 
 <br /> 
