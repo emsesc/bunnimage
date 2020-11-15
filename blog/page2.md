@@ -175,6 +175,8 @@ module.exports = async function (context, eventGridEvent, inputBlob) {
     context.done();
 };
 ```
+<br />
+
 Now that the long block of code is done with, let's take a look at some responses you should expect from the API.
 
 **This is what you would get if the file is still converting: 🤔**
