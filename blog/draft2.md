@@ -5,66 +5,13 @@ Yep... We need yet *another* Azure Function. (What can I say? They're pretty hel
 
 ⚠😵**WARNING**😵⚠ Lots of code ahead, but it's all good! I split it into sections.
 
-```js
-var multipart = require("parse-multipart");
-var fetch = require("node-fetch");
-const { BlobServiceClient } = require("@azure/storage-blob");
-const connectionstring = process.env["AZURE_STORAGE_CONNECTION_STRING"];
-const account = "bunnimagestorage";
+**First off, the *Online-Convert* API!**
+* We're going to need to get another secret key, except this time from the API. Here's [how to do that](https://apiv2.online-convert.com/docs/getting_started/api_key.html).
+* Once again, save it in your environment variables so it's accessible.
+* *Note: This API does have restrictions on the amount of conversions during 24 hours, so just be wary that you may turn an error after reaching the limit*
 
-module.exports = async function (context, eventGridEvent, inputBlob) {
-    context.log("<----------------START----------------------->")
-    
-    const blobUrl = context.bindingData.data.url;
-    const blobName = blobUrl.slice(blobUrl.lastIndexOf("/")+1);
-    // get blob url and name
-    context.log(`Blob Url: ${blobUrl}`);
-    //context.log(eventGridEvent);
-    context.log(`Image that was uploaded: ${blobName}`);
-    
-    var result = await convertImage(blobName);
-    jobId = result.id
+⬇This `convertImage()` function does exactly what it's called: convert the image by calling the API. Here's the [documentation](https://apiv2.online-convert.com/docs/input_types/cloud/azure_blob_storage.html)
 
-    status = false;
-    try {
-        while (!status) {
-            update = await checkStatus(jobId);
-            context.log("<------Trying-------->")
-            context.log(update);
-            if (update.status.code == "completed") {
-                context.log("[!] Image done converting")
-                status = true
-                uri = update.output[0].uri;
-                filename = update.output[0].filename;
-                context.log("Download URL: " + uri);
-                context.log("Donwnload file: " + filename);
-            } else if (update.status.info == "The file has not been converted due to errors."){
-                context.log("[!!!] AccountKey is incorrect")
-                context.done();
-            }
-        }
-    }
-    catch (e) {
-        context.log("[!!!] Daily Conversions Reached");
-        context.done();
-    }
-
-    //url = "https://www22.online-convert.com/dl/web7/download-file/ba0bc036-73a6-4bce-9230-1d0394224da1/thumbn.pdf"
-
-    let resp = await fetch(uri, {
-        method: 'GET',
-    })
-
-    let data = await resp.buffer();
-    context.log(data);
-    // let newfile = await uploadBlob(data, filename);
-    const uploadStatus = await uploadBlob(data, filename);
-    context.log("[!] Uploading to pdfs container...")
-    context.log(uploadStatus);
-    context.log("<----------------END---------------------->")
-    context.done();
-};
-```
 ```js
 async function convertImage(blobName){
     const api_key = process.env['convertAPI_KEY'];
@@ -110,6 +57,9 @@ async function convertImage(blobName){
     return data;
 }
 ```
+
+⬇To [check the status of the conversion](https://apiv2.online-convert.com/docs/getting_started/job_polling.html) to determine whether we can store the PDF to blob storage yet, let's use this `checkStatus()` function that makes a request to the same `https://api2.online-convert.com/jobs` endpoint, except with a GET request instead of POST.
+
 ```js
 async function checkStatus(jobId){
     const api_key = process.env['convertAPI_KEY'];
@@ -133,6 +83,8 @@ async function checkStatus(jobId){
     return data;
 }
 ```
+⬇Now, **this function should be familiar...** it's the same exact block of code we used to store our image earlier in the tutorial. *Phew, that already seems like so long ago right?*
+
 ```js
 async function uploadBlob(pdf, filename){
     // create blobserviceclient object that is used to create container client
@@ -157,6 +109,71 @@ async function uploadBlob(pdf, filename){
     return result;
 }
 ```
+⬇This is the main section of our code: it gets the blobName, calls the functions, and downloads the PDF to be stored. 
+* The Blob Name is retrieved from the eventgrid subscription subject
+* Because the API does not convert the image immediately, we need a while loop to repeatedly check for the status of the conversion. 
+* The last portion is simply used to [download the converted PDF](https://apiv2.online-convert.com/docs/getting_started/job_downloading.html) with a GET request to the URI you get from the completed file conversion response. (More clarification on that below)
+
+```js
+var multipart = require("parse-multipart");
+var fetch = require("node-fetch");
+const { BlobServiceClient } = require("@azure/storage-blob");
+const connectionstring = process.env["AZURE_STORAGE_CONNECTION_STRING"];
+const account = "bunnimagestorage";
+
+module.exports = async function (context, eventGridEvent, inputBlob) {
+    context.log("<----------------START----------------------->")
+    
+    const blobUrl = context.bindingData.data.url;
+    const blobName = blobUrl.slice(blobUrl.lastIndexOf("/")+1);
+    // get blob url and name
+    context.log(`Blob Url: ${blobUrl}`);
+    context.log(`Image that was uploaded: ${blobName}`);
+    
+    var result = await convertImage(blobName);
+    jobId = result.id
+
+    status = false;
+    try {
+        while (!status) {
+            update = await checkStatus(jobId);
+            context.log("<------Trying-------->")
+            context.log(update);
+            if (update.status.code == "completed") {
+                context.log("[!] Image done converting")
+                status = true
+                uri = update.output[0].uri;
+                filename = update.output[0].filename;
+                context.log("Download URL: " + uri);
+                context.log("Donwnload file: " + filename);
+            } else if (update.status.info == "The file has not been converted due to errors."){
+                context.log("[!!!] AccountKey is incorrect")
+                context.done();
+            }
+        }
+    }
+    catch (e) {
+        context.log("[!!!] Daily Conversions Reached");
+        context.done();
+    }
+
+    let resp = await fetch(uri, {
+        method: 'GET',
+    })
+
+    let data = await resp.buffer();
+    context.log(data);
+    // let newfile = await uploadBlob(data, filename);
+    const uploadStatus = await uploadBlob(data, filename);
+    context.log("[!] Uploading to pdfs container...")
+    context.log(uploadStatus);
+    context.log("<----------------END---------------------->")
+    context.done();
+};
+```
+
+
+
 
 ### Creating an Event Subscription
 When the image blob is stored in the "images" container, we want the conversion from jpg/jpeg/png to pdf to begin *immediately*! 
