@@ -2,7 +2,6 @@ async function handle(event) {
     event.preventDefault();
     var username = document.getElementById("username").value;
     $('#submit').html(`Trying to find pdf with "${username}"...`);
-    // $('#emotion').html("Loading...");
     // target the output element ID and change content
     // stop the page from reloading
 
