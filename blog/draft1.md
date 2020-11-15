@@ -22,8 +22,110 @@ These are the portions the tutorial will be in:
 
 ## Step 1: Upload the image ⬆️
 
+### Creating a Function App
+We're going to have a lot of triggers in this project, so we must get started by [creating a Function App](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-azure-function)! Create the Function App and proceed to create the first HTTP trigger (*this will upload our image*).
+
+**Before we start coding the trigger, though, we need to install some npm packages/libraries.**
+
+[`npm install parse-multipart`](https://www.npmjs.com/package/parse-multipart)
+
+[`npm install node-fetch`](https://www.npmjs.com/package/node-fetch) *This will be used in our second Azure Function*
+
+[`npm install @azure/storage-blob`](https://www.npmjs.com/package/@azure/storage-blob)
+
+> Tip: The Azure Storage Blob client library is going to be a key piece of the project. After all, it's about blobs!
+
+## Setting up your storage container
+This is the storage container your created when creating the Function App. If you don't know what it is, search "Storage Containers" in the query box in Azure portal. 
+1. We're going to need to create 2 containers: "images" and "pdfs"
+
+![image](https://user-images.githubusercontent.com/69332964/99161767-75194280-26c3-11eb-8ad1-c19d63d37bbb.png)
+![image](https://user-images.githubusercontent.com/69332964/99161780-8cf0c680-26c3-11eb-9bfc-78dc3262b038.png)
+
+2. You will need to upgrade your storage account because Event Grid Subscriptions will only work with a v2 storage account.
+
+
+```js
+var multipart = require("parse-multipart");
+const { BlobServiceClient } = require("@azure/storage-blob");
+const connectionstring = process.env["AZURE_STORAGE_CONNECTION_STRING"];
+const account = "bunnimagestorage";
+
+module.exports = async function (context, req) {
+    context.log('JavaScript HTTP trigger function processed a request.');
+
+    var boundary = multipart.getBoundary(req.headers['content-type']);
+    // get boundary for multipart data 
+    var body = req.body;
+    // get raw body
+    var parts = multipart.Parse(body, boundary);
+    // parse body
+    var username = req.headers['username'];
+    // get username from request header
+
+    var filetype = parts[0].type;
+
+    if (filetype == "image/png") {
+        ext = "png";
+    } else if (filetype == "image/jpeg") {
+        ext = "jpeg";
+    } else {
+        username = "invalidimage"
+        ext = "";
+    }
+
+    var result = await uploadBlob(parts, username, ext);
+    // call upload function to upload to blob storage
+
+    context.res = {
+            body: {
+                    result
+            }
+    };
+
+    console.log(result)
+    context.done();
+}
+
+async function uploadBlob(img, username, filetype){
+    // create blobserviceclient object that is used to create container client
+    const blobServiceClient = await BlobServiceClient.fromConnectionString(connectionstring);
+    // get reference to a container
+    const container = "images";
+    const containerClient = await blobServiceClient.getContainerClient(container);
+    // create blob name
+    const blobName = username + "." + filetype;
+    // get block blob client
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+    const uploadBlobResponse = await blockBlobClient.upload(img[0].data, img[0].data.length);
+    console.log(`Upload block blob ${blobName} successfully`, uploadBlobResponse.requestId);
+    result = {
+        body : {
+            name : blobName, 
+            type: img[0].type,
+            data: img[0].data.length,
+            success: true,
+            filetype: filetype
+        }
+    };
+    return result;
+}
+```
+
+* The parse-multipart library is being used here to parse the image from the POST request we will later make with the frontend; refer to the documentation linked above.
+* I also have some logic to determine the filetype (there are definitely so many more efficient ways... 🤭)
+* Take note of the process.env values being assigned to variables, use this [tutorial](https://docs.microsoft.com/en-us/azure/azure-functions/functions-how-to-use-azure-function-app-settings) to add in your own secret *shhhh* strings from your storage container. 
+    * The storage container **is the one you created when you started your Function App.** Navigate to it add find your secret strings here:
+    
+    ![image](https://user-images.githubusercontent.com/69332964/99161798-ba3d7480-26c3-11eb-8e55-eac4bd4cb174.png)
+    ![image](https://user-images.githubusercontent.com/69332964/99161822-ec4ed680-26c3-11eb-8977-f12beb496c24.png)
+    * Keep these safe, and add use them in the corresponding variables in the code.
+* Notice the `uploadBlob()` function! This is what's uploading the parsed image to the specified blob container.
+    * [YouTube Video to help explain](https://youtu.be/Qt_VXM_fml4) the handy dandy library
+<br />
+
 ### Frontend: The webpage
-Next, I created a static HTML page that will accept the image from the user and send to the Azure Function we just coded.
+Next, I created a static HTML page that will accept the image from the user and send to the Azure Function we just coded with some JS.
 
 *Note: I removed unnecessary sections of my code because I wanted to make the webpage ✨*fancy*✨, but you can see the whole thing [here](https://github.com/emsesc/bunnimage/blob/main/upload.html)*
 
@@ -88,6 +190,7 @@ Now, you may have noticed that I have `<script src="js/upload.js"></script>`, th
 
 ### Frontend: The Javascript
 
+Simply put, this block of Javascript updates the preview thumbnail while getting the picture, gets the username, and sends them both over to the function we just coded.
 ```js
 async function loadFile(event){
     console.log("Got picture!");
