@@ -171,9 +171,180 @@ module.exports = async function (context, eventGridEvent, inputBlob) {
     context.done();
 };
 ```
+Now that the long block of code is done with, let's take a look at some responses you should expect from the API.
 
+**This is what you would get if the file is still converting: 🤔**
+```json
+{
+   "id":"d86a1ef2-0bae-4c44-b7fc-b8064adfaf29",
+   "token":"[YOUR TOKEN]",
+   "type":"job",
+   "status":{
+      "code":"downloading",
+      "info":"The file is currently downloading from the source URL."
+   },
+   "errors":[
+      
+   ],
+   "warnings":[
+      
+   ],
+   "process":true,
+   "fail_on_input_error":true,
+   "fail_on_conversion_error":true,
+   "conversion":[
+      {
+         "id":"7496fdd6-98ad-4746-841e-6e786bf5ab4a",
+         "target":"pdf",
+         "category":"document",
+         "options":[
+            "Object"
+         ],
+         "metadata":{
+            
+         },
+         "output_target":[
+            
+         ]
+      }
+   ],
+   "input":[
+      {
+         "id":"9a60b3a7-1a16-4e4a-adc8-8f7a1105cd4b",
+         "type":"cloud",
+         "status":"downloading",
+         "source":"azure",
+         "engine":"auto",
+         "options":[
+            
+         ],
+         "filename":"",
+         "size":0,
+         "hash":"",
+         "checksum":"",
+         "content_type":"",
+         "created_at":"2020-11-15T16:37:24",
+         "modified_at":"2020-11-15T16:37:24",
+         "credentials":[
+            
+         ],
+         "parameters":[
+            "Object"
+         ],
+         "metadata":{
+            
+         }
+      }
+   ],
+   "output":[
+      
+   ],
+   "callback":"",
+   "notify_status":false,
+   "server":"https://www48.online-convert.com/dl/web7",
+   "spent":0,
+   "created_at":"2020-11-15T16:37:24",
+   "modified_at":"2020-11-15T16:37:24"
+}
+```
+<br />
 
+**Here's what you would get when the conversion is complete! (yay) 🥳**
+```json
+{
+   "id":"d86a1ef2-0bae-4c44-b7fc-b8064adfaf29",
+   "token":"[YOUR TOKEN]",
+   "type":"job",
+   "status":{
+      "code":"completed",
+      "info":"The file has been successfully converted."
+   },
+   "errors":[
+      
+   ],
+   "warnings":[
+      
+   ],
+   "process":true,
+   "fail_on_input_error":true,
+   "fail_on_conversion_error":true,
+   "conversion":[
+      {
+         "id":"7496fdd6-98ad-4746-841e-6e786bf5ab4a",
+         "target":"pdf",
+         "category":"document",
+         "options":[
+            "Object"
+         ],
+         "metadata":{
+            
+         },
+         "output_target":[
+            
+         ]
+      }
+   ],
+   "input":[
+      {
+         "id":"9a60b3a7-1a16-4e4a-adc8-8f7a1105cd4b",
+         "type":"cloud",
+         "status":"ready",
+         "source":"azure",
+         "engine":"auto",
+         "options":[
+            
+         ],
+         "filename":"bunnyshopper.jpg",
+         "size":77948,
+         "hash":"516b00b636181dce5d1f36054d1d6cbf",
+         "checksum":"516b00b636181dce5d1f36054d1d6cbf",
+         "content_type":"image/jpeg",
+         "created_at":"2020-11-15T16:37:24",
+         "modified_at":"2020-11-15T16:37:25",
+         "credentials":[
+            
+         ],
+         "parameters":[
+            "Object"
+         ],
+         "metadata":[
+            "Object"
+         ]
+      }
+   ],
+   "output":[
+      {
+         "id":"e40523c3-9c97-4411-ae45-201e390214a6",
+         "source":[
+            "Object"
+         ],
+         "filename":"bunnyshopper.pdf",
+         "uri":"https://www48.online-convert.com/dl/web7/download-file/e40523c3-9c97-4411-ae45-201e390214a6/bunnyshopper.pdf",
+         "size":86384,
+         "status":"enabled",
+         "content_type":"application/pdf",
+         "downloads_counter":0,
+         "checksum":"a5ef2da0c3ccc0753737b13b029fa65e",
+         "created_at":"2020-11-15T16:37:28"
+      }
+   ],
+   "callback":"",
+   "notify_status":false,
+   "server":"https://www48.online-convert.com/dl/web7",
+   "spent":1,
+   "created_at":"2020-11-15T16:37:24",
+   "modified_at":"2020-11-15T16:37:28"
+}
+```
 
+**Now, just to clarify, please take note of these important pieces of information provided by the outputs:**
+1. `update.status.code` --> This tells us whether its done processing or not
+2. `update.output[0].uri` --> This gives us the URL we can download the PDF at (used in the last GET request)
+3. `result.id` --> Gives the ID of the file conversion "job" so we can continually check for its status
+
+**Before we can test our code, we need one last step: The Trigger!**
+
+<br />
 
 ### Creating an Event Subscription
 When the image blob is stored in the "images" container, we want the conversion from jpg/jpeg/png to pdf to begin *immediately*! 
@@ -208,3 +379,6 @@ When the image blob is stored in the "images" container, we want the conversion 
   * This way, the subscription will **not** trigger when a PDF is stored in the "pdfs" container. It will **only** trigger when something is stored in "images."
 
 > Congratulations! You have now subscribed to the "blob created" event in your "images" container that triggers the convert image function!
+
+### Upload a converted PDF to the "pdfs" container!
+Now that we've connected our Functions and frontend together with an Event Grid Subscription, try submitting another image to check if it successfully uploads as a PDF into the "pdfs" container.
