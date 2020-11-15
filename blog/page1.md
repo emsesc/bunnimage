@@ -10,6 +10,7 @@ I wanted to create a project that was useful and applicable to 2020 as well as t
 ![image](https://user-images.githubusercontent.com/69332964/99191176-01198180-2739-11eb-9889-872822df6bd8.png)
 
 <br /> 
+
 **These are the portions the tutorial will be in:**
 
 1. Creating the "Upload" page and an HTTP Trigger Function that will upload the user's image to a storage container.
