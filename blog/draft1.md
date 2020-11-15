@@ -116,6 +116,7 @@ async function uploadBlob(img, username, filetype){
 }
 ```
 
+* Notice that we are able to name the file with the user's username by receiving it from the header. *Scroll down to see how we sent the username in the header*
 * The parse-multipart library is being used here to parse the image from the POST request we will later make with the frontend; refer to the documentation linked above.
 * I also have some if logic to determine the filetype (there are definitely so many more efficient ways... 🤭)
 * Take note of the process.env values being assigned to variables, use this [tutorial](https://docs.microsoft.com/en-us/azure/azure-functions/functions-how-to-use-azure-function-app-settings) to add in your own secret *shhhh* strings from your storage container. 
