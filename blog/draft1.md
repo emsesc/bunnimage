@@ -26,6 +26,7 @@ These are the portions the tutorial will be in:
 We're going to have a lot of triggers in this project, so we must get started by [creating a Function App](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-azure-function)! Create the Function App and proceed to create the first HTTP trigger (*this will upload our image*).
 
 **Before we start coding the trigger, though, we need to install some npm packages/libraries.**
+![image](https://user-images.githubusercontent.com/69332964/99189070-59e31d00-272d-11eb-80a4-17444e5fac65.png)
 
 [`npm install parse-multipart`](https://www.npmjs.com/package/parse-multipart)
 
@@ -35,14 +36,14 @@ We're going to have a lot of triggers in this project, so we must get started by
 
 > Tip: The Azure Storage Blob client library is going to be a key piece of the project. After all, it's about blobs!
 
-## Setting up your storage container
-This is the storage container your created when creating the Function App. If you don't know what it is, search "Storage Containers" in the query box in Azure portal. 
-1. We're going to need to create 2 containers: "images" and "pdfs"
+## Setting up your storage account 
+This is the storage account your created when creating the Function App. If you don't know what it is, search "Storage Containers" in the query box in Azure portal. 
+1. We're going to need to create 2 containers: "images" and "pdfs." These are kind of like folders in the account.
 
 ![image](https://user-images.githubusercontent.com/69332964/99161767-75194280-26c3-11eb-8ad1-c19d63d37bbb.png)
 ![image](https://user-images.githubusercontent.com/69332964/99161780-8cf0c680-26c3-11eb-9bfc-78dc3262b038.png)
 
-2. You will need to upgrade your storage account because Event Grid Subscriptions will only work with a v2 storage account.
+2. You will need to upgrade your storage account because Event Grid Subscriptions will only work with a v2 version. Follow this [tutorial](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-upgrade?tabs=azure-portal).
 
 
 ```js
@@ -113,14 +114,15 @@ async function uploadBlob(img, username, filetype){
 ```
 
 * The parse-multipart library is being used here to parse the image from the POST request we will later make with the frontend; refer to the documentation linked above.
-* I also have some logic to determine the filetype (there are definitely so many more efficient ways... 🤭)
+* I also have some if logic to determine the filetype (there are definitely so many more efficient ways... 🤭)
 * Take note of the process.env values being assigned to variables, use this [tutorial](https://docs.microsoft.com/en-us/azure/azure-functions/functions-how-to-use-azure-function-app-settings) to add in your own secret *shhhh* strings from your storage container. 
     * The storage container **is the one you created when you started your Function App.** Navigate to it add find your secret strings here:
     
     ![image](https://user-images.githubusercontent.com/69332964/99161798-ba3d7480-26c3-11eb-8e55-eac4bd4cb174.png)
     ![image](https://user-images.githubusercontent.com/69332964/99161822-ec4ed680-26c3-11eb-8977-f12beb496c24.png)
     * Keep these safe, and add use them in the corresponding variables in the code.
-* Notice the `uploadBlob()` function! This is what's uploading the parsed image to the specified blob container.
+    * *You're going to need the first key and connection string*
+* Notice the `uploadBlob()` function! This is what's uploading the parsed image to the specified "images" blob container.
     * [YouTube Video to help explain](https://youtu.be/Qt_VXM_fml4) the handy dandy library
 <br />
 
@@ -185,12 +187,19 @@ Next, I created a static HTML page that will accept the image from the user and 
 
 </html>
 ```
+**Here's what I have here:**
+* Input box for the username (simple and *insecure* auth system)
+* Button to submit
 
 Now, you may have noticed that I have `<script src="js/upload.js"></script>`, that is where we're heading next...
 
 ### Frontend: The Javascript
 
 Simply put, this block of Javascript updates the preview thumbnail while getting the picture, gets the username, and sends them both over to the function we just coded.
+1. `loadFile()` is called when the file input changes to display the thumbnail
+2. `handle()` is called when the file is submitted to POST the image and username
+    * Image is sent in the body, and username is sent as a header
+
 ```js
 async function loadFile(event){
     console.log("Got picture!");
@@ -231,3 +240,32 @@ async function handle(event) {
         console.log("Blob has been stored successfully!")
 }
 ```
+> Be sure to change the function url to the one of your upload image Function!
+![image](https://user-images.githubusercontent.com/69332964/99188529-73369a00-272a-11eb-93df-04fdce5381df.png)
+
+### Deploy your code
+* Try locally with the **live server extension** for VS Code
+* Try [Azure Web Apps](https://azure.microsoft.com/en-us/services/app-service/web/)
+* I personally used [repl.it](https://repl.it/languages/html)
+
+### Update CORS Settings
+> Crucial step!! 😱 If you don't change your CORS (Cross-origin resource sharing) settings, the POST request won't work. This tells the Function App what domains can access our Azure Function
+
+**Options:** 
+* Change it to a wildcard operator, which allows *all* origin domains to make requests (I recommend)
+    * Be sure to remove any other existing inputs before attempting to save with wildcard
+![image](https://user-images.githubusercontent.com/69332964/99188905-6f0b7c00-272c-11eb-8142-f91882227c78.png)
+* Change it to your domain you are using to host your code
+
+### Home stretch! 🏃🏻‍♀️
+**It's finally time to test our first step that our app will make!**
+
+1. Navigate to your HTML page and submit an image
+
+![image](https://user-images.githubusercontent.com/69332964/99189240-3cfb1980-272e-11eb-8896-e959f37480b3.png)
+![image](https://user-images.githubusercontent.com/69332964/99189255-53a17080-272e-11eb-9cab-a73faf504b3f.png)
+
+2. Go to the "images" storage container and check to see if your image is there!
+    *Error? Check the log in your Function*
+![image](https://user-images.githubusercontent.com/69332964/99189316-9c592980-272e-11eb-9870-dbc1f9352599.png)
+
