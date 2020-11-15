@@ -382,3 +382,7 @@ When the image blob is stored in the "images" container, we want the conversion 
 
 ### Upload a converted PDF to the "pdfs" container!
 Now that we've connected our Functions and frontend together with an Event Grid Subscription, try submitting another image to check if it successfully uploads as a PDF into the "pdfs" container.
+
+> If you used my code and have the same context.log()'s, you should get something like this when the PDF uploads:
+![image](https://user-images.githubusercontent.com/69332964/99191696-50ad7c80-273c-11eb-947e-5e9a9962ddb0.png)
+
