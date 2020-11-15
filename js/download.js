@@ -64,4 +64,5 @@ async function deletePdf(username) {
                 + currentdate.getMinutes() + ":" 
                 + currentdate.getSeconds();
   console.log("Deleted " + datetime);
+    // set timeout to delay the Azure Function from triggering to prevent Blob from deleting before PDF is downloaded.
 }
