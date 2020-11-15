@@ -41,16 +41,13 @@ module.exports = async function (context, eventGridEvent, inputBlob) {
         context.done();
     }
 
-    //url = "https://www22.online-convert.com/dl/web7/download-file/ba0bc036-73a6-4bce-9230-1d0394224da1/thumbn.pdf"
-
     let resp = await fetch(uri, {
         method: 'GET',
     })
 
     let data = await resp.buffer();
     context.log(data);
-    // let newfile = await uploadBlob(data, filename);
-    const uploadStatus = await uploadBlob(data, filename);
+    const uploadStatus = await uploadBlob(data, filename, blobName);
     context.log("[!] Uploading to pdfs container...")
     context.log(uploadStatus);
     context.log("<----------------END---------------------->")
@@ -124,7 +121,7 @@ async function checkStatus(jobId){
     return data;
 }
 
-async function uploadBlob(pdf, filename){
+async function uploadBlob(pdf, filename, image){
     // create blobserviceclient object that is used to create container client
     const blobServiceClient = await BlobServiceClient.fromConnectionString(connectionstring);
     // get reference to a container
@@ -136,14 +133,21 @@ async function uploadBlob(pdf, filename){
     const blockBlobClient = containerClient.getBlockBlobClient(blobName);
     const uploadBlobResponse = await blockBlobClient.upload(pdf, pdf.length);
     console.log(`Upload block blob ${blobName} successfully`, uploadBlobResponse.requestId);
+    const deletecontainer = "images";
+    const deletecontainerClient = await blobServiceClient.getContainerClient(deletecontainer);
+    const deleteblockBlobClient = deletecontainerClient.getBlockBlobClient(image);
+    const downloadBlockBlobResponse = await deleteblockBlobClient.download(0);
+    const blobDeleteResponse = deleteblockBlobClient.delete();
+    console.log(`Deleted block blob ${image} successfully`);
     result = {
         body : {
-            name : blobName, 
-            type: pdf.type,
+            uploadname : blobName, 
             data: pdf.length,
+            success: true,
+            deletename: image,
             success: true
         }
     };
     return result;
-}
 
+}
