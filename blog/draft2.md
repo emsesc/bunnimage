@@ -3,6 +3,10 @@
 ### Create another Azure Function
 Yep... We need yet *another* Azure Function. (What can I say? They're pretty helpful.) This one will trigger when **the image blob is stored**, convert it into a PDF, and store it in to the "pdfs" container.
 
+However, this time, it won't be an **HTTP Trigger**, so make sure you select the **Event Grid Trigger**
+![image](https://user-images.githubusercontent.com/69332964/99191739-a4b86100-273c-11eb-8015-9988540fc67c.png)
+
+
 ⚠😵**WARNING**😵⚠ Lots of code ahead, but it's all good! I split it into sections.
 
 **First off, the *Online-Convert* API!**
