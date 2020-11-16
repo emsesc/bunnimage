@@ -30,7 +30,7 @@ You can find a sample of the final product at [my Github repository](https://git
 ## Step 1: Upload the image ⬆️
 
 ### Creating a Function App
-We're going to have a lot of triggers in this project, so let's get started by [creating a Function App](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-azure-function)! Create the Function App and proceed to create the first HTTP trigger (*this will upload our image*).
+We're going to have a lot of triggers in this project, so let's get started by [creating a Function App](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-azure-function)! Follow those steps to create the Function App, and then create the first HTTP trigger (*this will upload our image*).
 
 Before we start coding the trigger, though, we need to install some npm packages/libraries.
 
