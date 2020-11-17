@@ -1,20 +1,22 @@
 ## Step 2: Convert The Image 🔄
 
 ### Create another Azure Function
-Yep... We need yet *another* Azure Function. (What can I say? They're pretty helpful.) This one will trigger when **the image blob is stored**, convert it into a PDF, and store it in to the "pdfs" container.
+Yep... We need yet *another* Azure Function. (What can I say? They're pretty helpful.) This one will trigger when **the image blob is stored**, then convert it into a PDF, and store it in the "pdfs" container.
 
-However, this time, it won't be an **HTTP Trigger**, so make sure you select the **Event Grid Trigger**
-![image](https://user-images.githubusercontent.com/69332964/99191739-a4b86100-273c-11eb-8015-9988540fc67c.png)
+However, this time, it will be an **Event Grid Trigger**, so make sure you select the right one! <-- How are they different from HTTP triggers?
+![alt text here](https://user-images.githubusercontent.com/69332964/99191739-a4b86100-273c-11eb-8015-9988540fc67c.png)
 
 
 ⚠😵**WARNING**😵⚠ Lots of code ahead, but it's all good! I split it into sections.
 
-**First off, the *Online-Convert* API!**
-* We're going to need to get another secret key, except this time from the API. Here's [how to do that](https://apiv2.online-convert.com/docs/getting_started/api_key.html).
-* Once again, save it in your environment variables so it's accessible.
-* *Note: This API does have restrictions on the amount of conversions during 24 hours, so just be wary that you may turn an error after reaching the limit*
+<!-- It would be good to have a short step-by-step here, like at the beginning of the overview of the whole tutorial: we're going to write a function that converts the image by calling the online convert API, checks whether the conversion is done, uploads it to blob storage, etc ... That way it is easier to remember which "step" you're on when you're in the middle of the tutorial. -->
 
-⬇This `convertImage()` function does exactly what it's called: convert the image by calling the API. Here's the [documentation](https://apiv2.online-convert.com/docs/input_types/cloud/azure_blob_storage.html)
+**First off, the *Online-Convert* API!**
+* We're going to need to get another secret key, except this time from the API. Here's [how to get that](https://apiv2.online-convert.com/docs/getting_started/api_key.html).
+* Once again, save it in your environment variables so it's accessible.
+* **Note**: This API does have restrictions on the amount of conversions during 24 hours, so just be aware that you may get an error after reaching the limit.
+
+⬇ This `convertImage()` function does exactly what it's called: convert the image by calling the Online-Convert API. Here's some [documentation](https://apiv2.online-convert.com/docs/input_types/cloud/azure_blob_storage.html) around how to use the API with Azure Blob Storage.
 
 ```js
 async function convertImage(blobName){
@@ -62,7 +64,7 @@ async function convertImage(blobName){
 }
 ```
 
-⬇To [check the status of the conversion](https://apiv2.online-convert.com/docs/getting_started/job_polling.html) to determine whether we can store the PDF to blob storage yet, let's use this `checkStatus()` function that makes a request to the same `https://api2.online-convert.com/jobs` endpoint, except with a GET request instead of POST.
+⬇To [check the status of the conversion](https://apiv2.online-convert.com/docs/getting_started/job_polling.html) and determine whether we can store the PDF to blob storage yet, let's use this `checkStatus()` function that makes a request to the same `https://api2.online-convert.com/jobs` endpoint, except with a GET request instead of POST.
 
 ```js
 async function checkStatus(jobId){
@@ -114,9 +116,9 @@ async function uploadBlob(pdf, filename){
 }
 ```
 ⬇This is the main section of our code: it gets the blobName, calls the functions, and downloads the PDF to be stored. 
-* The Blob Name is retrieved from the eventgrid subscription subject
+* The `blobName` is retrieved from the `EventGrid` subscription subject <-- What does this mean?
 * Because the API does not convert the image immediately, we need a while loop to repeatedly check for the status of the conversion. 
-* The last portion is simply used to [download the converted PDF](https://apiv2.online-convert.com/docs/getting_started/job_downloading.html) with a GET request to the URI you get from the completed file conversion response. (More clarification on that below)
+* The last portion is used to [download the converted PDF](https://apiv2.online-convert.com/docs/getting_started/job_downloading.html) by sending a GET request to the URI from the completed file conversion response.
 
 ```js
 var multipart = require("parse-multipart");
@@ -175,9 +177,8 @@ module.exports = async function (context, eventGridEvent, inputBlob) {
     context.done();
 };
 ```
-<br />
 
-Now that the long block of code is done with, let's take a look at some responses you should expect from the API.
+Now that the long block of code is done with, let's take a look at some responses you should expect from the API. <-- These are both pretty long and not really important to the actual tutorial. I would opt to use a Gist each and then simply put the link (not even embed) if people are curious.
 
 **This is what you would get if the file is still converting: 🤔**
 ```json
@@ -343,52 +344,49 @@ Now that the long block of code is done with, let's take a look at some response
 }
 ```
 
-**Now, just to clarify, please take note of these important pieces of information provided by the outputs:**
-1. `update.status.code` --> This tells us whether its done processing or not
-2. `update.output[0].uri` --> This gives us the URL we can download the PDF at (used in the last GET request)
-3. `result.id` --> Gives the ID of the file conversion "job" so we can continually check for its status
+**In particular, there are 3 important pieces of the output we should examine:**
+1. `update.status.code`: This tells us whether its done processing or not
+2. `update.output[0].uri`: This gives us the URL we can download the PDF at (used in the last GET request)
+3. `result.id`: Gives the ID of the file conversion "job" so we can continually check for its status
 
-**Before we can test our code, we need one last step: The Trigger!**
-
-<br />
+Before we can test our code, we need one last step: the trigger!
 
 ### Creating an Event Subscription
 When the image blob is stored in the "images" container, we want the conversion from jpg/jpeg/png to pdf to begin *immediately*! 
-> Just like when you "subscribe" to a YouTube channel it gives you notifications, we're going to subscribe to our own Blob Storage and trigger the Azure Function.
+> Just like how "subscribing" to a YouTube channel gives you notifications, we're going to subscribe to our own Blob Storage and trigger the Azure Function.
 
-**1. Search "Event Grid Subscriptions" in the search bar**
+**Tip**: You'll want to keep the names for your storage account and resource group handy.
 
-**2. Click "+ Event Subscription" in the top left**
+1. Search "Event Grid Subscriptions" in the search bar
+2. Click "+ Event Subscription" in the top left
+3. Fill in the form to create the Event Subscription:
 
-**3. Actually creating it:**
+![alt text here also - consider splitting this screenshot in half](https://user-images.githubusercontent.com/69332964/99189683-5c934180-2730-11eb-8451-17762bf46866.png)
+* If it asks you for a name, feel free to put anything you want - I named it "[INSERT NAME HERE]"
+* Under Topic Types, select "Storage Accounts"
+* The "Resource Group" is the Resource Group that holds your storage account
+* The "Resource" is your storage account name
 
-![image](https://user-images.githubusercontent.com/69332964/99189683-5c934180-2730-11eb-8451-17762bf46866.png)
-* If it asks you for a name, feel free to put anything you want (make it make sense though...)
-* Topic Types = Storage Accounts
-* Resource Group = [Insert your Resource Group that holds your storage account]
-* Resource = [Insert your storage account name]
+**Note**: If your storage account doesn't appear, you forgot to follow the "upgrade to v2 storage" step
+* Under Event Types: filter to **Blob Created**
 
-*Note: If your storage account doesn't appear, you forgot to follow the "upgrade to v2 storage" step*
-* Event Types: **Only select Blob Created**
+![alt text here](https://user-images.githubusercontent.com/69332964/99189740-aed46280-2730-11eb-8ff0-c8a7ba19aadc.png)
+* The "Endpoint Type" is "Azure Function"
 
-![image](https://user-images.githubusercontent.com/69332964/99189740-aed46280-2730-11eb-8ff0-c8a7ba19aadc.png)
-* Endpoint Type: Azure Function
+![alt text here](https://user-images.githubusercontent.com/69332964/99189763-d0354e80-2730-11eb-91e4-5b17fc5e63bd.png)
+* The "Function" is the function we want triggered when an image is uploaded, so the `convertImage` function
 
-![image](https://user-images.githubusercontent.com/69332964/99189763-d0354e80-2730-11eb-91e4-5b17fc5e63bd.png)
-* Function = [The one we just created to convert the image.. NOT the one that uploads the image blob]
-
-**4. Tweaking some settings...**
+4. Tweaking some settings...
 
 * Navigate to the "Filters" tab and "Enable Subject Filtering"
-![image](https://user-images.githubusercontent.com/69332964/99189929-bd6f4980-2731-11eb-9b01-b0cef972b96a.png)
+![alt text here](https://user-images.githubusercontent.com/69332964/99189929-bd6f4980-2731-11eb-9b01-b0cef972b96a.png)
 * Change the "Subject Begins With" to `/blobServices/default/containers/images/blobs/`
   * This way, the subscription will **not** trigger when a PDF is stored in the "pdfs" container. It will **only** trigger when something is stored in "images."
 
-> Congratulations! You have now subscribed to the "blob created" event in your "images" container that triggers the convert image function!
+> **Congratulations!** You have now subscribed to the "blob created" event in your "images" container that triggers the convert image function!
 
 ### Upload a converted PDF to the "pdfs" container!
 Now that we've connected our Functions and frontend together with an Event Grid Subscription, try submitting another image to check if it successfully uploads as a PDF into the "pdfs" container.
 
-> If you used my code and have the same context.log()'s, you should get something like this when the PDF uploads:
-![image](https://user-images.githubusercontent.com/69332964/99191696-50ad7c80-273c-11eb-947e-5e9a9962ddb0.png)
-
+> If you used my code and have the same `context.log()`s, you should get something like this when the PDF uploads:
+![alt text here](https://user-images.githubusercontent.com/69332964/99191696-50ad7c80-273c-11eb-947e-5e9a9962ddb0.png)
