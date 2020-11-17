@@ -1,9 +1,11 @@
 ## Step 3: Downloading the PDF on the HTML page ⬇
 Now that we have a PDF stored in the "pdfs" container, how will we get the PDF back to the user? **You got it right, yet *another* Azure Function**!
 
-> Create another HTTP Trigger *this one will return the PDF download URL to the frontend when triggered*
+Create another HTTP Trigger - this one will return the PDF download URL to the frontend when triggered.
 
 ### Azure Functions: Check if the PDF is ready to be served 🍝
+
+First, it receives the username to get the correct PDF from the header of the request, which is made by the webpage.
 ```js
 var fetch = require("node-fetch");
 module.exports = async function (context, req, inputBlob) {
@@ -11,7 +13,10 @@ module.exports = async function (context, req, inputBlob) {
 
     var username = req.headers['username'];
     var download = "https://bunnimagestorage.blob.core.windows.net/pdfs/" + username + ".pdf";
-    
+```
+
+Then, using the personalized URL, it performs a GET request to check if the PDF has been stored in the "pdfs" container.
+```js
     let resp = await fetch(download, {
         method: 'GET',
     })
@@ -24,14 +29,16 @@ module.exports = async function (context, req, inputBlob) {
         context.log("Does exist: " + data)
     }
 
+```
+
+The function then returns the URL for downloading the PDF and whether or not the PDF is ready for download to the webpage.
+```js
     context.res = {
             body: {
                     "downloadUri" : download,
                     "success": success,
             }
     };
-
-
     // receive the response
 
     context.log(download);
@@ -39,14 +46,10 @@ module.exports = async function (context, req, inputBlob) {
     context.done();
 }
 ```
-Lucky for us, this trigger is fairly simple. 
-1. It receives the username to get the correct PDF from the header of the request (the request is made by the webpage)
-2. Using the personalized URL, it performs a GET request to check if the PDF has been stored in the "pdfs" container. *Returns TRUE or FALSE*
-3. The function then returns the URL for downloading the PDF and whether or not the PDF is ready for download to the webpage, **which is where we're heading now...**
 
 ### Frontend: Creating the Download HTML page
 
-Once again, the ***fancy*** stuff is omitted.
+Once again, the "fancy" stuff is omitted. <!-- but please omit the unnecessary stuff ... ! -->
 ```html
 <!doctype html>
 <html class="no-js" lang="zxx">
@@ -98,12 +101,15 @@ Once again, the ***fancy*** stuff is omitted.
 
 </html>
 ```
-
-Honestly, not that bad. Just an input for the username and two buttons (one for refreshing to check if the PDF is ready and the other for downloading the file).
-*The other one just refreshes the page*
+<!-- This needs a better segue from the code -->
+This piece of code creates:
+- An input for the username
+- One button for refreshing to check if the PDF is ready
+- One button for downloading the file
 
 ### Frontend: Downloading the PDF on the Webpage
 
+<!-- Intersperse these comments with your code -->
 Before we get bombarded with code again, here's what the script does:
 * Change the HTML to display the current status (whether it's looking for the PDF, whether it's ready for download, etc.)
 * Make a request to the HTTP Trigger Function we just coded, sending the username inputted on the HTML page along with it
@@ -157,10 +163,9 @@ function getPdf(link, username) {
 ## Amazing! You're done! 
 
 Here's the finished product in which I download the cute bunny shopping picture I uploaded earlier.
-![image](https://user-images.githubusercontent.com/69332964/99192741-95d4ad00-2742-11eb-8b77-f0c9e6d159d7.png)
-![image](https://user-images.githubusercontent.com/69332964/99192756-b00e8b00-2742-11eb-9fea-dc64a9083c63.png)
-![image](https://user-images.githubusercontent.com/69332964/99192766-bbfa4d00-2742-11eb-8371-630af1b21778.png)
+![alt text here](https://user-images.githubusercontent.com/69332964/99192741-95d4ad00-2742-11eb-8b77-f0c9e6d159d7.png)
+![alt text here](https://user-images.githubusercontent.com/69332964/99192756-b00e8b00-2742-11eb-9fea-dc64a9083c63.png)
+![alt text here](https://user-images.githubusercontent.com/69332964/99192766-bbfa4d00-2742-11eb-8371-630af1b21778.png)
 
-**Challenge: *Use your new knowledge of Blob Storage, HTTP Triggers, the Node SDK (@azure/storage-blob), and some [Stack Overflow](https://stackoverflow.com/questions/60716837/how-to-delete-a-blob-from-azure-blob-v12-sdk-for-node-js) of course to assist you to add a feature to delete the image and PDF blobs.***
+**Challenge: *Use your new knowledge of Blob Storage, HTTP Triggers, the Node SDK (@azure/storage-blob), and some [Stack Overflow](https://stackoverflow.com/questions/60716837/how-to-delete-a-blob-from-azure-blob-v12-sdk-for-node-js) to assist you to add a feature to delete the image and PDF blobs.***
 > Tip: You will need to create [this function](https://github.com/emsesc/bunnimage/blob/main/azure/deletePDF.js), update [this JavaScript](https://github.com/emsesc/bunnimage/blob/main/js/download.js), and add some code [to this](https://github.com/emsesc/bunnimage/blob/main/azure/convertImage.js)
-
