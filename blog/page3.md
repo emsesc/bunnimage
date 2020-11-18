@@ -3,6 +3,13 @@ Now that we have a PDF stored in the "pdfs" container, how will we get the PDF b
 
 Create another HTTP Trigger - this one will return the PDF download URL to the frontend when triggered.
 
+**Commercial Break** 📺
+Let's recap:
+* **Step 1 ✅:** We created the "Upload" page and an HTTP Trigger Function that uploaded the user's image to a storage container.
+* **Step 2 ✅:** We will create an **Event Grid** function that converts the image into a PDF by calling the *Online Convert API* and will upload the PDF to blob storage.
+* **Step 3:** We will create a HTTP Trigger function that returns the PDF to the user when triggered by the "Download" page.
+* **Step 4:** ***Optional*** If you choose, create another HTTP Trigger function and modify other code to delete the image and PDF blobs from storage containers once they are unneeded.
+
 ### Azure Functions: Check if the PDF is ready to be served 🍝
 
 First, it receives the username to get the correct PDF from the header of the request, which is made by the webpage.
