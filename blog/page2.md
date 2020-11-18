@@ -3,14 +3,25 @@
 ### Create another Azure Function
 Yep... We need yet *another* Azure Function. (What can I say? They're pretty helpful.) This one will trigger when **the image blob is stored**, then convert it into a PDF, and store it in the "pdfs" container.
 
-However, this time, it will be an **Event Grid Trigger**, so make sure you select the right one! <-- How are they different from HTTP triggers?
+However, this time, it will be an **Event Grid Trigger**, so make sure you select the right one! 
 
 ![Select the Event Grid Trigger](https://user-images.githubusercontent.com/69332964/99191739-a4b86100-273c-11eb-8015-9988540fc67c.png)
 
+> What's the difference?
+> * Event Grid Triggers trigger based on an **Event Grid Subscription,** which we will create later in this step.
+> 	* Our trigger will fire when a blob is stored in the "images" container
+> * HTTP Triggers fire when a GET or POST request is made to the endpoint (function URL)
+
+<br />
+
+**Commercial Break** 📺
+Let's recap:
+* **Step 1 ✅:** We created the "Upload" page and an HTTP Trigger Function that uploaded the user's image to a storage container.
+* **Step 2:** We will create an **Event Grid** function that converts the image into a PDF by calling the *Online Convert API* and will upload the PDF to blob storage.
+
+<br />
 
 ⚠😵**WARNING**😵⚠ Lots of code ahead, but it's all good! I split it into sections.
-
-<!-- It would be good to have a short step-by-step here, like at the beginning of the overview of the whole tutorial: we're going to write a function that converts the image by calling the online convert API, checks whether the conversion is done, uploads it to blob storage, etc ... That way it is easier to remember which "step" you're on when you're in the middle of the tutorial. -->
 
 **First off, the *Online-Convert* API!**
 * We're going to need to get another secret key, except this time from the API. Here's [how to get that](https://apiv2.online-convert.com/docs/getting_started/api_key.html).
@@ -117,9 +128,14 @@ async function uploadBlob(pdf, filename){
 }
 ```
 ⬇This is the main section of our code: it gets the blobName, calls the functions, and downloads the PDF to be stored. 
-* The `blobName` is retrieved from the `EventGrid` subscription subject <-- What does this mean?
+* The `blobName` is retrieved from the `EventGrid` subscription subject* in lines... [!!!!!]
 * Because the API does not convert the image immediately, we need a while loop to repeatedly check for the status of the conversion. 
 * The last portion is used to [download the converted PDF](https://apiv2.online-convert.com/docs/getting_started/job_downloading.html) by sending a GET request to the URI from the completed file conversion response.
+
+> *What's a subject?
+> * This part of the [Event response](https://docs.microsoft.com/en-us/azure/event-grid/event-schema-blob-storage#microsoftstorageblobcreated-event) contains information about what specific file caused the Azure Function to fire.
+> * Example: `/blobServices/default/containers/test-container/blobs/new-file.txt` where the file is `new-file.txt`
+
 
 ```js
 var multipart = require("parse-multipart");
@@ -179,171 +195,11 @@ module.exports = async function (context, eventGridEvent, inputBlob) {
 };
 ```
 
-Now that the long block of code is done with, let's take a look at some responses you should expect from the API. <-- These are both pretty long and not really important to the actual tutorial. I would opt to use a Gist each and then simply put the link (not even embed) if people are curious.
+**Now that the long block of code is done with, let's take a look at some responses you should expect from the API.**
 
-**This is what you would get if the file is still converting: 🤔**
-```json
-{
-   "id":"d86a1ef2-0bae-4c44-b7fc-b8064adfaf29",
-   "token":"[YOUR TOKEN]",
-   "type":"job",
-   "status":{
-      "code":"downloading",
-      "info":"The file is currently downloading from the source URL."
-   },
-   "errors":[
-      
-   ],
-   "warnings":[
-      
-   ],
-   "process":true,
-   "fail_on_input_error":true,
-   "fail_on_conversion_error":true,
-   "conversion":[
-      {
-         "id":"7496fdd6-98ad-4746-841e-6e786bf5ab4a",
-         "target":"pdf",
-         "category":"document",
-         "options":[
-            "Object"
-         ],
-         "metadata":{
-            
-         },
-         "output_target":[
-            
-         ]
-      }
-   ],
-   "input":[
-      {
-         "id":"9a60b3a7-1a16-4e4a-adc8-8f7a1105cd4b",
-         "type":"cloud",
-         "status":"downloading",
-         "source":"azure",
-         "engine":"auto",
-         "options":[
-            
-         ],
-         "filename":"",
-         "size":0,
-         "hash":"",
-         "checksum":"",
-         "content_type":"",
-         "created_at":"2020-11-15T16:37:24",
-         "modified_at":"2020-11-15T16:37:24",
-         "credentials":[
-            
-         ],
-         "parameters":[
-            "Object"
-         ],
-         "metadata":{
-            
-         }
-      }
-   ],
-   "output":[
-      
-   ],
-   "callback":"",
-   "notify_status":false,
-   "server":"https://www48.online-convert.com/dl/web7",
-   "spent":0,
-   "created_at":"2020-11-15T16:37:24",
-   "modified_at":"2020-11-15T16:37:24"
-}
-```
-<br />
+* [This is](https://gist.github.com/emsesc/01e30ba32a6fd84572e35f26fe8479c4) what you would get if the file is still converting 🤔
+* [Here's](https://gist.github.com/emsesc/6018bafcf24f02a58a8f7f14d52ffbb8) what you would get when the conversion is complete! (yay) 🥳
 
-**Here's what you would get when the conversion is complete! (yay) 🥳**
-```json
-{
-   "id":"d86a1ef2-0bae-4c44-b7fc-b8064adfaf29",
-   "token":"[YOUR TOKEN]",
-   "type":"job",
-   "status":{
-      "code":"completed",
-      "info":"The file has been successfully converted."
-   },
-   "errors":[
-      
-   ],
-   "warnings":[
-      
-   ],
-   "process":true,
-   "fail_on_input_error":true,
-   "fail_on_conversion_error":true,
-   "conversion":[
-      {
-         "id":"7496fdd6-98ad-4746-841e-6e786bf5ab4a",
-         "target":"pdf",
-         "category":"document",
-         "options":[
-            "Object"
-         ],
-         "metadata":{
-            
-         },
-         "output_target":[
-            
-         ]
-      }
-   ],
-   "input":[
-      {
-         "id":"9a60b3a7-1a16-4e4a-adc8-8f7a1105cd4b",
-         "type":"cloud",
-         "status":"ready",
-         "source":"azure",
-         "engine":"auto",
-         "options":[
-            
-         ],
-         "filename":"bunnyshopper.jpg",
-         "size":77948,
-         "hash":"516b00b636181dce5d1f36054d1d6cbf",
-         "checksum":"516b00b636181dce5d1f36054d1d6cbf",
-         "content_type":"image/jpeg",
-         "created_at":"2020-11-15T16:37:24",
-         "modified_at":"2020-11-15T16:37:25",
-         "credentials":[
-            
-         ],
-         "parameters":[
-            "Object"
-         ],
-         "metadata":[
-            "Object"
-         ]
-      }
-   ],
-   "output":[
-      {
-         "id":"e40523c3-9c97-4411-ae45-201e390214a6",
-         "source":[
-            "Object"
-         ],
-         "filename":"bunnyshopper.pdf",
-         "uri":"https://www48.online-convert.com/dl/web7/download-file/e40523c3-9c97-4411-ae45-201e390214a6/bunnyshopper.pdf",
-         "size":86384,
-         "status":"enabled",
-         "content_type":"application/pdf",
-         "downloads_counter":0,
-         "checksum":"a5ef2da0c3ccc0753737b13b029fa65e",
-         "created_at":"2020-11-15T16:37:28"
-      }
-   ],
-   "callback":"",
-   "notify_status":false,
-   "server":"https://www48.online-convert.com/dl/web7",
-   "spent":1,
-   "created_at":"2020-11-15T16:37:24",
-   "modified_at":"2020-11-15T16:37:28"
-}
-```
 
 **In particular, there are 3 important pieces of the output we should examine:**
 1. `update.status.code`: This tells us whether its done processing or not
@@ -363,12 +219,12 @@ When the image blob is stored in the "images" container, we want the conversion 
 3. Fill in the form to create the Event Subscription:
 
 ![Filling in Name, Topic types, Subscription, resource group, and resource](https://user-images.githubusercontent.com/69332964/99469463-c10cf700-2910-11eb-929e-e7feff85f203.png)
-* If it asks you for a name, feel free to put anything you want - I named it "[INSERT NAME HERE]"
+* If it asks you for a name, feel free to put anything you want - I named it "fileUploaded"
 * Under Topic Types, select "Storage Accounts"
 * The "Resource Group" is the Resource Group that holds your storage account
 * The "Resource" is your storage account name
 
-**Note**: If your storage account doesn't appear, you forgot to follow the "upgrade to v2 storage" step
+**Note**: If your storage account doesn't appear, you forgot to follow the ["upgrade to v2 storage"](INSERT LINK) step
 
 ![Filling in Event Types](https://user-images.githubusercontent.com/69332964/99469567-05989280-2911-11eb-9cf2-827a604f638e.png)
 
