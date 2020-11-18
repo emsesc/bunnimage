@@ -163,9 +163,9 @@ function getPdf(link, username) {
 ## Amazing! You're done! 
 
 Here's the finished product in which I download the cute bunny shopping picture I uploaded earlier.
-![alt text here](https://user-images.githubusercontent.com/69332964/99192741-95d4ad00-2742-11eb-8b77-f0c9e6d159d7.png)
-![alt text here](https://user-images.githubusercontent.com/69332964/99192756-b00e8b00-2742-11eb-9fea-dc64a9083c63.png)
-![alt text here](https://user-images.githubusercontent.com/69332964/99192766-bbfa4d00-2742-11eb-8371-630af1b21778.png)
+![Bunnimage webpage before clicking refresh](https://user-images.githubusercontent.com/69332964/99192741-95d4ad00-2742-11eb-8b77-f0c9e6d159d7.png)
+![Bunnimage webpage after clicking refresh and downloading pdf](https://user-images.githubusercontent.com/69332964/99192756-b00e8b00-2742-11eb-9fea-dc64a9083c63.png)
+![The downloaded PDF of the bunny shopping picture](https://user-images.githubusercontent.com/69332964/99192766-bbfa4d00-2742-11eb-8371-630af1b21778.png)
 
 **Challenge: *Use your new knowledge of Blob Storage, HTTP Triggers, the Node SDK (@azure/storage-blob), and some [Stack Overflow](https://stackoverflow.com/questions/60716837/how-to-delete-a-blob-from-azure-blob-v12-sdk-for-node-js) to assist you to add a feature to delete the image and PDF blobs.***
 > Tip: You will need to create [this function](https://github.com/emsesc/bunnimage/blob/main/azure/deletePDF.js), update [this JavaScript](https://github.com/emsesc/bunnimage/blob/main/js/download.js), and add some code [to this](https://github.com/emsesc/bunnimage/blob/main/azure/convertImage.js)
