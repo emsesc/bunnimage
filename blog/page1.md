@@ -33,6 +33,11 @@ You can find a sample of the final product at [my Github repository](https://git
 ### Creating a Function App
 We're going to have a lot of triggers in this project, so let's get started by [creating a Function App](https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-first-azure-function)! Follow those steps to create the Function App, and then create the first HTTP trigger (*this will upload our image*).
 
+> **Note: it will be helpful if you keep track of these strings for reference later in the project:**
+> * Storage account name (found in "Hosting")
+> * Function App name
+> * Resource Group
+
 Before we start coding the trigger, though, we need to install some npm packages/libraries.
 
 Click on the "Console" tab in the left panel under "Development Tools".
@@ -60,72 +65,9 @@ It would also be preferable to, if possible, to break your code up into several 
 That way it's easier to follow along as a reader.
 Also, please include large code snippets as Github Gists (that way we can also have line numbers), and readers can easily fork them.
 
-```js
-var multipart = require("parse-multipart");
-const { BlobServiceClient } = require("@azure/storage-blob");
-const connectionstring = process.env["AZURE_STORAGE_CONNECTION_STRING"];
-const account = "bunnimagestorage";
+<script src="https://gist.github.com/emsesc/d09a6d7c0caa1318d8e184ebf412c185.js"></script>
 
-module.exports = async function (context, req) {
-    context.log('JavaScript HTTP trigger function processed a request.');
-
-    var boundary = multipart.getBoundary(req.headers['content-type']);
-    // get boundary for multipart data 
-    var body = req.body;
-    // get raw body
-    var parts = multipart.Parse(body, boundary);
-    // parse body
-    var username = req.headers['username'];
-    // get username from request header
-
-    var filetype = parts[0].type;
-
-    if (filetype == "image/png") {
-        ext = "png";
-    } else if (filetype == "image/jpeg") {
-        ext = "jpeg";
-    } else {
-        username = "invalidimage"
-        ext = "";
-    }
-
-    var result = await uploadBlob(parts, username, ext);
-    // call upload function to upload to blob storage
-
-    context.res = {
-            body: {
-                    result
-            }
-    };
-
-    console.log(result)
-    context.done();
-}
-
-async function uploadBlob(img, username, filetype){
-    // create blobserviceclient object that is used to create container client
-    const blobServiceClient = await BlobServiceClient.fromConnectionString(connectionstring);
-    // get reference to a container
-    const container = "images";
-    const containerClient = await blobServiceClient.getContainerClient(container);
-    // create blob name
-    const blobName = username + "." + filetype;
-    // get block blob client
-    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-    const uploadBlobResponse = await blockBlobClient.upload(img[0].data, img[0].data.length);
-    console.log(`Upload block blob ${blobName} successfully`, uploadBlobResponse.requestId);
-    result = {
-        body : {
-            name : blobName, 
-            type: img[0].type,
-            data: img[0].data.length,
-            success: true,
-            filetype: filetype
-        }
-    };
-    return result;
-}
-```
+<script src="https://gist.github.com/emsesc/8177c15fea34c208bc9a7fc9ea0bc585.js"></script>
 
 * Notice that we are able to name the file with the user's username by receiving it from the header. *Scroll down to see how we sent the username in the header* <- **This is not clear at all, you need to reference a line number**
 * The `parse-multipart` library is being used here to parse the image from the POST request we will later make with the frontend; refer to the documentation linked above.
@@ -145,69 +87,15 @@ Next, I created a static HTML page that will accept the image from the user and 
 
 vvv Again, please don't post entire files. As a reader they're an awful barrier for entry. Highlight the necessary parts and move on. For example, including the head section is not really necessary.
 
-```html
-<!doctype html>
-<html class="no-js" lang="zxx">
+<script src="https://gist.github.com/emsesc/faaa81463826cb383110d86071ace146.js"></script>
 
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Bunnimage</title>
-    <meta name="description" content="">
-    <link rel="icon" href="img/icon/3.svg"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- CSS here -->
-    <link rel="stylesheet" href="css/style.css">
-    <!-- <link rel="stylesheet" href="css/responsive.css"> -->
-</head>
-
-<body>
-    <!-- about  -->
-    <div class="features_area ">
-        <div class="container">
-            <div class="features_main_wrap">
-                    <div class="row  align-items-center">
-                            <div class="col-xl-5 col-lg-5 col-md-6">
-                                <div class="features_info2">
-                                    <h3>Time to upload!</h3>
-                                    <p>Submit your image here by attaching your file AND typing in your username. Remember to have the "download" page open on your receiving device!</p>
-                                    <form id="image-form" onsubmit="handle(event)" enctype="multipart/form-data">
-                                      <input class="label" type="file" onChange="loadFile(event)" accept="image/x-png,image/jpeg" name="image"></input>
-                                      <img id="output" 
-                                      class="img-fluid" src="img/logo.png"></img>
-                                      <br></br>
-                                      <input id="username" type="text" class="form-control" placeholder="Enter valid username">
-                                      <br></br>
-                                      <input class="boxed-btn3" type="submit" value="Submit Your Picture 📷"></input>
-                                      <p id="submit">You haven't submitted anything.</p>
-                                  </form>
-                                </div>
-                            </div>
-                            <div class="col-xl-5 col-lg-5 offset-xl-1 offset-lg-1 col-md-6 ">
-                                <div class="about_draw wow fadeInUp" data-wow-duration=".7s" data-wow-delay=".5s">
-                                    <img id="upload" src="img/uploading.gif" alt="">
-                                </div>
-                            </div>
-                    </div>
-            </div>
-    </div>
-
-    <!-- JS here -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
-    <script src="js/upload.js"></script>
-</body>
-
-</html>
-```
 **Above we have:**
 * Input box for the username (simple but *insecure* auth system)
 * Button to submit
 
 Now, you may have noticed that I have `<script src="js/upload.js"></script>`, that is where we're heading next... <-- Where!! Line numbers or snippets, please.
 
-### Frontend: The Javascript <- Be more specific, what is the JS in this section for?
+### Frontend: Javascript for interacting with the Azure Function
 
 This block of Javascript updates the preview thumbnail while getting the picture, gets the username, and sends them both over to the function we just coded.
 
@@ -223,38 +111,9 @@ async function loadFile(event){
 ```
 
 Then, `handle()` is called when the file is submitted to POST the image and username. The image is sent in the body, and username is sent as a header.
-```js
-async function handle(event) {
-    event.preventDefault();
-    document.getElementById("output").src = "img/logo.png";
-    console.log("Loading picture");
-    var username = document.getElementById("username").value;
-    if (username.includes(' ') == true || username == '') {
-      alert("Invalid username. A username cannot contain a space.");
-      window.location.reload();
-      return;
-    }
 
-    document.getElementById("upload").src = "img/doneupload.gif";
-    $('#submit').html(`Thank you for your image, use "${username}" to receive your pdf.`);
+<script src="https://gist.github.com/emsesc/b4d045380641847163399aa4fed6841e.js"></script>
 
-    var myform = document.getElementById("image-form");
-        var payload = new FormData(myform);
-
-        console.log("Posting your image...");
-        const resp = await fetch("https://bunnimage1.azurewebsites.net/api/uploadTrigger?code=Ia/3vNYiimrORzxaZRGlmdm695dnnSpCP0qd7R1k1WaUeRO2JUfGtg==", {
-            method: 'POST',
-            headers: {
-                'username' : username
-            },
-            body: payload
-        });
-
-        var data = await resp.json();
-        console.log(data);
-        console.log("Blob has been stored successfully!")
-}
-```
 > Be sure to change the function url (**where**) to the one of your upload image Function!
 ![Indicates where the "Get Function URL" button is](https://user-images.githubusercontent.com/69332964/99188529-73369a00-272a-11eb-93df-04fdce5381df.png)
 
