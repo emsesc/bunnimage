@@ -4,7 +4,8 @@
 Yep... We need yet *another* Azure Function. (What can I say? They're pretty helpful.) This one will trigger when **the image blob is stored**, then convert it into a PDF, and store it in the "pdfs" container.
 
 However, this time, it will be an **Event Grid Trigger**, so make sure you select the right one! <-- How are they different from HTTP triggers?
-![alt text here](https://user-images.githubusercontent.com/69332964/99191739-a4b86100-273c-11eb-8015-9988540fc67c.png)
+
+![Select the Event Grid Trigger](https://user-images.githubusercontent.com/69332964/99191739-a4b86100-273c-11eb-8015-9988540fc67c.png)
 
 
 ⚠😵**WARNING**😵⚠ Lots of code ahead, but it's all good! I split it into sections.
@@ -361,25 +362,28 @@ When the image blob is stored in the "images" container, we want the conversion 
 2. Click "+ Event Subscription" in the top left
 3. Fill in the form to create the Event Subscription:
 
-![alt text here also - consider splitting this screenshot in half](https://user-images.githubusercontent.com/69332964/99189683-5c934180-2730-11eb-8451-17762bf46866.png)
+![Filling in Name, Topic types, Subscription, resource group, and resource](https://user-images.githubusercontent.com/69332964/99469463-c10cf700-2910-11eb-929e-e7feff85f203.png)
 * If it asks you for a name, feel free to put anything you want - I named it "[INSERT NAME HERE]"
 * Under Topic Types, select "Storage Accounts"
 * The "Resource Group" is the Resource Group that holds your storage account
 * The "Resource" is your storage account name
 
 **Note**: If your storage account doesn't appear, you forgot to follow the "upgrade to v2 storage" step
+
+![Filling in Event Types](https://user-images.githubusercontent.com/69332964/99469567-05989280-2911-11eb-9cf2-827a604f638e.png)
+
 * Under Event Types: filter to **Blob Created**
 
-![alt text here](https://user-images.githubusercontent.com/69332964/99189740-aed46280-2730-11eb-8ff0-c8a7ba19aadc.png)
+![Filling in Endpoint Type](https://user-images.githubusercontent.com/69332964/99189740-aed46280-2730-11eb-8ff0-c8a7ba19aadc.png)
 * The "Endpoint Type" is "Azure Function"
 
-![alt text here](https://user-images.githubusercontent.com/69332964/99189763-d0354e80-2730-11eb-91e4-5b17fc5e63bd.png)
+![Filling in Endpoint Function](https://user-images.githubusercontent.com/69332964/99189763-d0354e80-2730-11eb-91e4-5b17fc5e63bd.png)
 * The "Function" is the function we want triggered when an image is uploaded, so the `convertImage` function
 
 4. Tweaking some settings...
 
 * Navigate to the "Filters" tab and "Enable Subject Filtering"
-![alt text here](https://user-images.githubusercontent.com/69332964/99189929-bd6f4980-2731-11eb-9b01-b0cef972b96a.png)
+![Filling in subject filters](https://user-images.githubusercontent.com/69332964/99189929-bd6f4980-2731-11eb-9b01-b0cef972b96a.png)
 * Change the "Subject Begins With" to `/blobServices/default/containers/images/blobs/`
   * This way, the subscription will **not** trigger when a PDF is stored in the "pdfs" container. It will **only** trigger when something is stored in "images."
 
@@ -389,4 +393,4 @@ When the image blob is stored in the "images" container, we want the conversion 
 Now that we've connected our Functions and frontend together with an Event Grid Subscription, try submitting another image to check if it successfully uploads as a PDF into the "pdfs" container.
 
 > If you used my code and have the same `context.log()`s, you should get something like this when the PDF uploads:
-![alt text here](https://user-images.githubusercontent.com/69332964/99191696-50ad7c80-273c-11eb-947e-5e9a9962ddb0.png)
+![Example output of console](https://user-images.githubusercontent.com/69332964/99191696-50ad7c80-273c-11eb-947e-5e9a9962ddb0.png)
