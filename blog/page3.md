@@ -56,57 +56,19 @@ The function then returns the URL for downloading the PDF and whether or not the
 
 ### Frontend: Creating the Download HTML page
 
-Once again, the "fancy" stuff is omitted. <!-- but please omit the unnecessary stuff ... ! -->
+Once again, the "fancy" stuff is omitted. 
 ```html
-<!doctype html>
-<html class="no-js" lang="zxx">
-
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Bunnimage</title>
-    <link rel="icon" href="img/icon/2.svg"/>
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <link rel="stylesheet" href="css/style.css">
-</head>
-
-<body>
-    <div class="features_area ">
-        <div class="container">
-            <div class="features_main_wrap">
-                    <div class="row  align-items-center">
-                            <div class="col-xl-5 col-lg-5 col-md-6">
-                                <div class="features_info2">
-                                    <h3>Download Your File</h3>
-                                    <p>Type in your username and continually refresh to check for your pdf.</p>
-                                    <form id="image-form" onsubmit="handle(event)" enctype="multipart/form-data">
-                                      <img id="output" 
-                                      class="img-fluid"></img>
-                                      <input class="boxed-btn1" type="button" value="Download Another Picture" onclick="window.location.reload();"></input>
-                                      <br></br>
-                                      <input id="username" type="text" class="form-control" placeholder="Enter valid username">
-                                      <br></br>
-                                      <input class="boxed-btn3" type="submit" value="Refresh" id="refresh"></input>
-                                      <input style="visibility: hidden" class="boxed-btn3" type="button" value="Download File" id="getLink" download target="_blank"></input>
-                                      <p id="submit">Type in the username you used to upload and click refresh.</p>
-                                  </form>
-                                </div>
-                            </div>
-                            <div class="col-xl-5 col-lg-5 offset-xl-1 offset-lg-1 col-md-6 ">
-                                <div class="about_draw wow fadeInUp" data-wow-duration=".7s" data-wow-delay=".5s">
-                                    <img id="upload" src="img/downloading.gif" alt="">
-                                </div>
-                            </div>
-                    </div>
-            </div>
-    </div>
-
-    <script src="js/download.js"></script>
-</body>
-
-</html>
+<form id="image-form" onsubmit="handle(event)" enctype="multipart/form-data">
+   <img id="output" 
+      class="img-fluid"></img>
+   <input class="boxed-btn1" type="button" value="Download Another Picture" onclick="window.location.reload();"></input>
+   <br></br>
+   <input id="username" type="text" class="form-control" placeholder="Enter valid username">
+   <br></br>
+   <input class="boxed-btn3" type="submit" value="Refresh" id="refresh"></input>
+   <input style="visibility: hidden" class="boxed-btn3" type="button" value="Download File" id="getLink" download target="_blank"></input>
+   <p id="submit">Type in the username you used to upload and click refresh.</p>
+</form>
 ```
 <!-- This needs a better segue from the code -->
 This piece of code creates:
