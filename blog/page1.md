@@ -51,7 +51,7 @@ Inside the console (shown on the right panel), type in the following commands:
 
 > **Tip**: The Azure Storage Blob client library is going to be a key piece of the project. After all, it's about blobs!
 
-## Setting up your storage account 
+### Setting up your storage account 
 This is the storage account you created when creating the Function App. If you don't know what it is, search "Storage Containers" in the query box in Azure portal. 
 1. We're going to need to create 2 containers: "images" and "pdfs." Think of these as folders in the account.
 
@@ -60,32 +60,45 @@ This is the storage account you created when creating the Function App. If you d
 
 2. You will need to upgrade your storage account because Event Grid Subscriptions will only work with a v2 version. Follow this [tutorial](https://docs.microsoft.com/en-us/azure/storage/common/storage-account-upgrade?tabs=azure-portal) to upgrade it.
 
-vv This code snippet has absolutely no context? You need to introduce it somehow.
-It would also be preferable to, if possible, to break your code up into several smaller sections, instead of a huge monolith.
-That way it's easier to follow along as a reader.
-Also, please include large code snippets as Github Gists (that way we can also have line numbers), and readers can easily fork them.
+### Writing our *First* Azure Function to Upload an Image
 
-<script src="https://gist.github.com/emsesc/d09a6d7c0caa1318d8e184ebf412c185.js"></script>
-
-<script src="https://gist.github.com/emsesc/8177c15fea34c208bc9a7fc9ea0bc585.js"></script>
-
-* Notice that we are able to name the file with the user's username by receiving it from the header. *Scroll down to see how we sent the username in the header* <- **This is not clear at all, you need to reference a line number**
-* The `parse-multipart` library is being used here to parse the image from the POST request we will later make with the frontend; refer to the documentation linked above.
-* Take note of the `process.env` values being assigned to variables. Use this [tutorial](https://docs.microsoft.com/en-us/azure/azure-functions/functions-how-to-use-azure-function-app-settings) to add in your own secret strings from your storage container. 
+⬇ **Some housekeeping...**
+* For the function to work, we have to initialize the packages/libraries we installed in the beginning of part 1. 
+* Take note of the `process.env` value being assigned to `connectionstring`. Use this [tutorial](https://docs.microsoft.com/en-us/azure/azure-functions/functions-how-to-use-azure-function-app-settings) to add in your own secret strings from your storage container. 
     * The storage container is the one you created when you started your Function App. Navigate to it and find your secret strings here:
     
     ![Indicates where access keys are](https://user-images.githubusercontent.com/69332964/99161798-ba3d7480-26c3-11eb-8e55-eac4bd4cb174.png)
     ![What the access keys page looks like](https://user-images.githubusercontent.com/69332964/99161822-ec4ed680-26c3-11eb-8977-f12beb496c24.png)
-    * Keep these safe, and use the first key and connection string in the corresponding variables in the code.
-* I can't! Give me a line number! -> Notice the `uploadBlob()` function! This is what uploads the parsed image to the specified "images" blob container.
+    * Keep these safe, and use the connection string in the corresponding variable in the code.
+    - *Note: You'll need to store other strings in environment variables later on in the tutorial*
+
+<script src="https://gist.github.com/emsesc/b658b23b36610084ffb7d649e5821bac.js"></script>
+
+<br />
+
+⬇ **The main block of code**
+* Notice that we are able to name the file with the user's username by receiving it from the header. *Line 10*
+   * Later on in the JS, we will send the username in the header of the request.
+* The `parse-multipart` library is being used here to parse the image from the POST request we will later make with the frontend; refer to the documentation linked above. *Lines 4-11*
+* Some if else logic is used to determine the file extension. *Lines 13-22*
+* We then call the `uploadBlob()` function explained next *Line 24*
+
+<script src="https://gist.github.com/emsesc/d09a6d7c0caa1318d8e184ebf412c185.js"></script>
+
+<br />
+
+⬇ **Uploading the image blob to the "images" container**
+* Notice the `uploadBlob()` function! This is what uploads the parsed image to the specified "images" blob container.
     * Here's a [YouTube Video to help explain](https://youtu.be/Qt_VXM_fml4) the handy dandy library
 
-### Frontend: The webpage
+<script src="https://gist.github.com/emsesc/8177c15fea34c208bc9a7fc9ea0bc585.js"></script>
+
+<br />
+
+### Frontend: The "upload" webpage
 Next, I created a static HTML page that will accept the image from the user and send to the Azure Function we just coded using Javascript.
 
 *Note*: I removed unnecessary sections of my code because I wanted to make the webpage ✨*fancy*✨, but you can see the whole thing [here](https://github.com/emsesc/bunnimage/blob/main/upload.html)
-
-vvv Again, please don't post entire files. As a reader they're an awful barrier for entry. Highlight the necessary parts and move on. For example, including the head section is not really necessary.
 
 <script src="https://gist.github.com/emsesc/faaa81463826cb383110d86071ace146.js"></script>
 
@@ -93,7 +106,7 @@ vvv Again, please don't post entire files. As a reader they're an awful barrier 
 * Input box for the username (simple but *insecure* auth system)
 * Button to submit
 
-Now, you may have noticed that I have `<script src="js/upload.js"></script>`, that is where we're heading next... <-- Where!! Line numbers or snippets, please.
+However, a static HTML webpage can't make a request to the Azure Function itself, which is where we're going to cook up some JS. 😯
 
 ### Frontend: Javascript for interacting with the Azure Function
 
@@ -110,11 +123,11 @@ async function loadFile(event){
 }
 ```
 
-Then, `handle()` is called when the file is submitted to POST the image and username. The image is sent in the body, and username is sent as a header.
+Then, `handle()` is called when the file is submitted to POST the image and username. The image is sent in the body, and username is sent as a header. *Lines 15-30*
 
 <script src="https://gist.github.com/emsesc/b4d045380641847163399aa4fed6841e.js"></script>
 
-> Be sure to change the function url (**where**) to the one of your upload image Function!
+> Be sure to change the function url *on Line 19* to the one of your upload image Function!
 ![Indicates where the "Get Function URL" button is](https://user-images.githubusercontent.com/69332964/99188529-73369a00-272a-11eb-93df-04fdce5381df.png)
 
 ### Deploy your code
