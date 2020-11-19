@@ -4,6 +4,7 @@ Now that we have a PDF stored in the "pdfs" container, how will we get the PDF b
 Create another HTTP Trigger - this one will return the PDF download URL to the frontend when triggered.
 
 **Commercial Break** 📺
+
 Let's recap:
 * **Step 1 ✅:** We created the "Upload" page and an HTTP Trigger Function that uploaded the user's image to a storage container.
 * **Step 2 ✅:** We will create an **Event Grid** function that converts the image into a PDF by calling the *Online Convert API* and will upload the PDF to blob storage.
@@ -12,7 +13,7 @@ Let's recap:
 
 ### Azure Functions: Check if the PDF is ready to be served 🍝
 
-First, it receives the username to get the correct PDF from the header of the request, which is made by the webpage.
+⬇First, it receives the username to get the correct PDF from the header of the request, which is made by the webpage. You will see this request later on in the JS of this step.
 ```js
 var fetch = require("node-fetch");
 module.exports = async function (context, req, inputBlob) {
@@ -22,7 +23,7 @@ module.exports = async function (context, req, inputBlob) {
     var download = "https://bunnimagestorage.blob.core.windows.net/pdfs/" + username + ".pdf";
 ```
 
-Then, using the personalized URL, it performs a GET request to check if the PDF has been stored in the "pdfs" container.
+⬇Then, using the personalized URL, it performs a GET request to check if the PDF has been stored in the "pdfs" container.
 ```js
     let resp = await fetch(download, {
         method: 'GET',
@@ -38,7 +39,7 @@ Then, using the personalized URL, it performs a GET request to check if the PDF 
 
 ```
 
-The function then returns the URL for downloading the PDF and whether or not the PDF is ready for download to the webpage.
+⬇The function then returns the URL for downloading the PDF and whether or not the PDF is ready for download to the webpage.
 ```js
     context.res = {
             body: {
