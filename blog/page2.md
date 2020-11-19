@@ -15,6 +15,7 @@ However, this time, it will be an **Event Grid Trigger**, so make sure you selec
 <br />
 
 **Commercial Break** 📺
+
 Let's recap:
 * **Step 1 ✅:** We created the "Upload" page and an HTTP Trigger Function that uploaded the user's image to a storage container.
 * **Step 2:** We will create an **Event Grid** function that converts the image into a PDF by calling the *Online Convert API* and will upload the PDF to blob storage.
@@ -128,72 +129,15 @@ async function uploadBlob(pdf, filename){
 }
 ```
 ⬇This is the main section of our code: it gets the blobName, calls the functions, and downloads the PDF to be stored. 
-* The `blobName` is retrieved from the `EventGrid` subscription subject* in lines... [!!!!!]
-* Because the API does not convert the image immediately, we need a while loop to repeatedly check for the status of the conversion. 
-* The last portion is used to [download the converted PDF](https://apiv2.online-convert.com/docs/getting_started/job_downloading.html) by sending a GET request to the URI from the completed file conversion response.
+* The `blobName` is retrieved from the `EventGrid` subscription subject* in *lines 10-11*
+* Because the API does not convert the image immediately, we need a while loop to repeatedly check for the status of the conversion. *Lines 21-36*
+* The last portion is used to [download the converted PDF](https://apiv2.online-convert.com/docs/getting_started/job_downloading.html) by sending a GET request to the URI from the completed file conversion response. *Lines 43-47*
 
 > *What's a subject?
 > * This part of the [Event response](https://docs.microsoft.com/en-us/azure/event-grid/event-schema-blob-storage#microsoftstorageblobcreated-event) contains information about what specific file caused the Azure Function to fire.
 > * Example: `/blobServices/default/containers/test-container/blobs/new-file.txt` where the file is `new-file.txt`
 
-
-```js
-var multipart = require("parse-multipart");
-var fetch = require("node-fetch");
-const { BlobServiceClient } = require("@azure/storage-blob");
-const connectionstring = process.env["AZURE_STORAGE_CONNECTION_STRING"];
-const account = "bunnimagestorage";
-
-module.exports = async function (context, eventGridEvent, inputBlob) {
-    context.log("<----------------START----------------------->")
-    
-    const blobUrl = context.bindingData.data.url;
-    const blobName = blobUrl.slice(blobUrl.lastIndexOf("/")+1);
-    // get blob url and name
-    context.log(`Blob Url: ${blobUrl}`);
-    context.log(`Image that was uploaded: ${blobName}`);
-    
-    var result = await convertImage(blobName);
-    jobId = result.id
-
-    status = false;
-    try {
-        while (!status) {
-            update = await checkStatus(jobId);
-            context.log("<------Trying-------->")
-            context.log(update);
-            if (update.status.code == "completed") {
-                context.log("[!] Image done converting")
-                status = true
-                uri = update.output[0].uri;
-                filename = update.output[0].filename;
-                context.log("Download URL: " + uri);
-                context.log("Donwnload file: " + filename);
-            } else if (update.status.info == "The file has not been converted due to errors."){
-                context.log("[!!!] AccountKey is incorrect")
-                context.done();
-            }
-        }
-    }
-    catch (e) {
-        context.log("[!!!] Daily Conversions Reached");
-        context.done();
-    }
-
-    let resp = await fetch(uri, {
-        method: 'GET',
-    })
-
-    let data = await resp.buffer();
-    context.log(data);
-    // let newfile = await uploadBlob(data, filename);
-    const uploadStatus = await uploadBlob(data, filename);
-    context.log("[!] Uploading to pdfs container...")
-    context.log(uploadStatus);
-    context.log("<----------------END---------------------->")
-    context.done();
-};
-```
+<script src="https://gist.github.com/emsesc/74bf9fa8958ff1030b29319ccfcc43e1.js"></script>
 
 **Now that the long block of code is done with, let's take a look at some responses you should expect from the API.**
 
