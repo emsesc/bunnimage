@@ -58,77 +58,39 @@ module.exports = async function (context, req, inputBlob) {
 ### Frontend: Creating the Download HTML page
 
 Once again, the "fancy" stuff is omitted. 
-```html
-<form id="image-form" onsubmit="handle(event)" enctype="multipart/form-data">
-   <img id="output" 
-      class="img-fluid"></img>
-   <input class="boxed-btn1" type="button" value="Download Another Picture" onclick="window.location.reload();"></input>
-   <br></br>
-   <input id="username" type="text" class="form-control" placeholder="Enter valid username">
-   <br></br>
-   <input class="boxed-btn3" type="submit" value="Refresh" id="refresh"></input>
-   <input style="visibility: hidden" class="boxed-btn3" type="button" value="Download File" id="getLink" download target="_blank"></input>
-   <p id="submit">Type in the username you used to upload and click refresh.</p>
-</form>
-```
-<!-- This needs a better segue from the code -->
+
+<script src="https://gist.github.com/emsesc/f727674180de797ba7c55ebd4124eef0.js"></script>
+
+
+**Like we created the "upload" page in Step 1, we now need a "download" page for users to receive the PDF.**
+
 This piece of code creates:
-- An input for the username
-- One button for refreshing to check if the PDF is ready
-- One button for downloading the file
+- An input for the username *Line 6*
+- One button for refreshing to check if the PDF is ready *Line 8*
+- One button for downloading the file *Line 9*
 
 ### Frontend: Downloading the PDF on the Webpage
 
 <!-- Intersperse these comments with your code -->
-Before we get bombarded with code again, here's what the script does:
-* Change the HTML to display the current status (whether it's looking for the PDF, whether it's ready for download, etc.)
-* Make a request to the HTTP Trigger Function we just coded, sending the username inputted on the HTML page along with it
+Time to get bombarded with some *lovely* JS!
+
+**Part 1**:
+
+* Change the HTML to display the current status (whether it's looking for the PDF, whether it's ready for download, etc.) *Lines 2-4*
+* Make a request to the HTTP Trigger Function we just coded, sending the username inputted on the HTML page along with it *Lines 9-16*
+
+<script src="https://gist.github.com/emsesc/39f52ee0928f19f709324a1427b9b89f.js"></script>
+
+**Part 2**:
+
+* First we're going to find the link to download the PDF with `data.downloadUri` on *line 1*
 * Change buttons from "Refresh" to "Download" when PDF is ready for download
-  * Remove the "Refresh" button and make "Download" visible
-* Set the `onclick` attribute of the "Download" button to call the `getPdf()` function with the unique username + link for download. 
-  * The `getPdf()` function allows for immediate download with `window.open(link)`
+  * **How to do this?** Remove the "Refresh" button *Lines 10-11* and make "Download" visible *Line 9*
+* Set the `onclick` attribute of the "Download" button to call the `getPdf()` function with the unique username + link for download. *Line 8*
+  * The `getPdf()` function allows for immediate download with `window.open(link)` *Lines 16-19*
   
-```js
-async function handle(event) {
-    event.preventDefault();
-    var username = document.getElementById("username").value;
-    $('#submit').html(`Trying to find pdf with "${username}"...`);
-    // target the output element ID and change content
-    // stop the page from reloading
+<script src="https://gist.github.com/emsesc/3eeb6e52e5f8598f226a62e9e809647a.js"></script>
 
-    var myform = document.getElementById("image-form");
-        console.log("Attempting to get your pdf...");
-        const resp = await fetch("https://bunnimage1.azurewebsites.net/api/downloadTrigger?code=ryCKYqZQJpiq9bagb4Nmifbg6pFZvcyfsNmF4GEybYaL68bGsbdrNA==", {
-            method: 'GET',
-            headers: {
-                'username' : username
-            },
-        });
-
-        var data = await resp.json();
-        console.log("PDF link received!")
-        console.log(data.downloadUri)
-        console.log(data.success)
-        const link = data.downloadUri
-        var success = data.success
-
-        if (!success) {
-          $('#submit').html(`Your file named ${username}.pdf has not been converted yet. Please continue refreshing!`)
-        } else {
-          $('#submit').html(`Found ${username}.pdf! Click to Download.`);
-          document.getElementById('getLink').setAttribute('onclick',`getPdf("${link}", "${username}")`);
-          document.getElementById("getLink").style.visibility = "visible";
-          var element = document.getElementById("refresh");
-          element.parentNode.removeChild(element);
-          document.getElementById("upload").src = "img/downloadsuccess.gif";
-        }
-}
-
-function getPdf(link, username) {
-  window.open(link);
-  document.getElementById("getLink").disabled = true;
-}
-```
 
 ## Amazing! You're done! 
 
