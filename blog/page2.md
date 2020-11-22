@@ -39,7 +39,7 @@ async function convertImage(blobName){
     const accountKey = process.env['accountKey'];
     const uriBase = "https://api2.online-convert.com/jobs";
 	// env variables (similar to .gitignore/.env file) to not expose personal info
-
+// check out documentation 
     img = {
     "conversion": [{
         "target": "pdf"
@@ -85,7 +85,7 @@ async function convertImage(blobName){
 async function checkStatus(jobId){
     const api_key = process.env['convertAPI_KEY'];
     const uriBase = "https://api2.online-convert.com/jobs";
-	// env variables (similar to .gitignore/.env file) to not expose personal info
+	// env variables to keep your info private!
 
     // making the post request
     let resp = await fetch(uriBase + "/" + jobId, {
@@ -135,12 +135,14 @@ async function uploadBlob(pdf, filename){
 * Because the API does not convert the image immediately, we need a while loop to repeatedly check for the status of the conversion. *Lines 21-36*
 * The last portion is used to [download the converted PDF](https://apiv2.online-convert.com/docs/getting_started/job_downloading.html) by sending a GET request to the URI from the completed file conversion response. *Lines 43-47*
 
+{% gist https://gist.github.com/emsesc/74bf9fa8958ff1030b29319ccfcc43e1 %}
+
 > *What's a subject?
 > * This part of the [Event response](https://docs.microsoft.com/en-us/azure/event-grid/event-schema-blob-storage#microsoftstorageblobcreated-event) contains information about what specific file caused the Azure Function to fire.
 > * Example: `/blobServices/default/containers/test-container/blobs/new-file.txt` where the file is `new-file.txt`
 
-<script src="https://gist.github.com/emsesc/74bf9fa8958ff1030b29319ccfcc43e1.js"></script>
-<br />
+{% gist https://gist.github.com/emsesc/4bf9fa8958ff1030b29319ccfcc43e1 %}
+
 <br />
 
 **Now that the long block of code is done with, let's take a look at some responses you should expect from the API.**
