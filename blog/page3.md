@@ -3,6 +3,8 @@ Now that we have a PDF stored in the "pdfs" container, how will we get the PDF b
 
 Create another HTTP Trigger - this one will return the PDF download URL to the frontend when triggered.
 
+![Here you go gif](https://media.giphy.com/media/MYx9qA5yTknqgb4abz/giphy.gif)
+
 **Commercial Break** 📺
 
 Let's recap:
