@@ -16,7 +16,7 @@ However, it is arguable that creating this web app increased my stress levels, b
 1. Creating the "Upload" page and an HTTP Trigger Function that will upload the user's image to a storage container.
 2. Setting up an Event Grid Subscription and a Function that converts the image into a PDF and stores it again. 
    - This is where the API will live!
-3. Creating the "Download" page and an HTTP Trigger Function that retrieve the correct PDF. 
+3. Creating the "Download" page and an HTTP Trigger Function that retrieves the correct PDF. 
 4. **Optional** For those who are interested, we can add another Function to delete the files and keep our containers squeaky clean. 
    - **Note**: The diagram above excludes the optional deletion feature.
 
@@ -73,7 +73,7 @@ This is the storage account you created when creating the Function App. If you d
     * Keep these safe, and use the connection string in the corresponding variable in the code.
     - *Note: You'll need to store other strings in environment variables later on in the tutorial*
 
-<script src="https://gist.github.com/emsesc/b658b23b36610084ffb7d649e5821bac.js"></script>
+{% gist https://gist.github.com/emsesc/b658b23b36610084ffb7d649e5821bac %}
 
 <br />
 
@@ -85,15 +85,15 @@ This is the storage account you created when creating the Function App. If you d
 * Some if else logic is used to determine the file extension. *Lines 13-22*
 * We then call the `uploadBlob()` function explained next *Line 24*
 
-<script src="https://gist.github.com/emsesc/d09a6d7c0caa1318d8e184ebf412c185.js"></script>
-<br />
+{% gist https://gist.github.com/emsesc/d09a6d7c0caa1318d8e184ebf412c185 %}
+
 <br />
 
 ⬇ **Uploading the image blob to the "images" container**
 * Notice the `uploadBlob()` function! This is what uploads the parsed image to the specified "images" blob container.
     * Here's a [YouTube Video to help explain](https://youtu.be/Qt_VXM_fml4) the handy dandy library
 
-<script src="https://gist.github.com/emsesc/8177c15fea34c208bc9a7fc9ea0bc585.js"></script>
+{% gist https://gist.github.com/emsesc/8177c15fea34c208bc9a7fc9ea0bc585 %}
 
 <br />
 
@@ -103,8 +103,8 @@ Next, I created a static HTML page that will accept the image from the user and 
 
 *Note*: I removed unnecessary sections of my code because I wanted to make the webpage ✨*fancy*✨, but you can see the whole thing [here](https://github.com/emsesc/bunnimage/blob/main/upload.html)
 
-<script src="https://gist.github.com/emsesc/faaa81463826cb383110d86071ace146.js"></script>
-<br />
+{% gist https://gist.github.com/emsesc/faaa81463826cb383110d86071ace146 %}
+
 <br />
 
 **Above we have:**
@@ -130,13 +130,13 @@ async function loadFile(event){
 
 Then, `handle()` is called when the file is submitted to POST the image and username. The image is sent in the body, and username is sent as a header. *Lines 15-30*
 
-<script src="https://gist.github.com/emsesc/b4d045380641847163399aa4fed6841e.js"></script>
+{% gist https://gist.github.com/emsesc/b4d045380641847163399aa4fed6841e %}
 
 > Be sure to change the function url *on Line 19* to the one of your upload image Function!
 ![Indicates where the "Get Function URL" button is](https://user-images.githubusercontent.com/69332964/99188529-73369a00-272a-11eb-93df-04fdce5381df.png)
 
 ### Deploy your code
-* Try locally with the **live server extension** for VS Code
+* Try doing it locally with the **live server extension** for VS Code
 * Try [Azure Web Apps](https://azure.microsoft.com/en-us/services/app-service/web/)
 * I personally used [repl.it](https://repl.it/languages/html)
 
@@ -147,7 +147,7 @@ Then, `handle()` is called when the file is submitted to POST the image and user
 * **Recommended**: Change it to a wildcard operator (`*`), which allows *all* origin domains to make requests
     * Be sure to remove any other existing inputs before attempting to save with wildcard
 ![Indicates where CORS settings are](https://user-images.githubusercontent.com/69332964/99188905-6f0b7c00-272c-11eb-8142-f91882227c78.png)
-* Change it to your domain you are using to host your code
+* Change it to the domain you are using to host your code
 
 ### Home stretch! 🏃🏻‍♀️
 **It's finally time to test our first step that our app will make!**
