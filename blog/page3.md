@@ -61,8 +61,10 @@ Once again, the "fancy" stuff is omitted.
 
 <script src="https://gist.github.com/emsesc/f727674180de797ba7c55ebd4124eef0.js"></script>
 
+<br />
+<br />
 
-**Like we created the "upload" page in Step 1, we now need a "download" page for users to receive the PDF.**
+⬆**Like we created the "upload" page in Step 1, we now need a "download" page for users to receive the PDF.**
 
 This piece of code creates:
 - An input for the username *Line 6*
@@ -74,14 +76,17 @@ This piece of code creates:
 <!-- Intersperse these comments with your code -->
 Time to get bombarded with some *lovely* JS!
 
-**Part 1**:
+**Part 1** ⬇:
 
 * Change the HTML to display the current status (whether it's looking for the PDF, whether it's ready for download, etc.) *Lines 2-4*
 * Make a request to the HTTP Trigger Function we just coded, sending the username inputted on the HTML page along with it *Lines 9-16*
 
 <script src="https://gist.github.com/emsesc/39f52ee0928f19f709324a1427b9b89f.js"></script>
 
-**Part 2**:
+<br />
+<br />
+
+**Part 2** ⬇:
 
 * First we're going to find the link to download the PDF with `data.downloadUri` on *line 1*
 * Change buttons from "Refresh" to "Download" when PDF is ready for download
@@ -91,6 +96,8 @@ Time to get bombarded with some *lovely* JS!
   
 <script src="https://gist.github.com/emsesc/3eeb6e52e5f8598f226a62e9e809647a.js"></script>
 
+<br />
+<br />
 
 ## Amazing! You're done! 
 
