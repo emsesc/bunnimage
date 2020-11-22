@@ -138,6 +138,8 @@ async function uploadBlob(pdf, filename){
 > * Example: `/blobServices/default/containers/test-container/blobs/new-file.txt` where the file is `new-file.txt`
 
 <script src="https://gist.github.com/emsesc/74bf9fa8958ff1030b29319ccfcc43e1.js"></script>
+<br />
+<br />
 
 **Now that the long block of code is done with, let's take a look at some responses you should expect from the API.**
 
