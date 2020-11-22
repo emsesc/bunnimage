@@ -45,6 +45,7 @@ Click on the "Console" tab in the left panel under "Development Tools".
 
 Inside the console (shown on the right panel), type in the following commands:
 
+`npm init -y` <br />
 [`npm install parse-multipart`](https://www.npmjs.com/package/parse-multipart)  
 [`npm install node-fetch`](https://www.npmjs.com/package/node-fetch)  
 [`npm install @azure/storage-blob`](https://www.npmjs.com/package/@azure/storage-blob)  
@@ -64,7 +65,7 @@ This is the storage account you created when creating the Function App. If you d
 
 ⬇ **Some housekeeping...**
 * For the function to work, we have to initialize the packages/libraries we installed in the beginning of part 1. 
-* Take note of the `process.env` value being assigned to `connectionstring`. Use this [tutorial](https://docs.microsoft.com/en-us/azure/azure-functions/functions-how-to-use-azure-function-app-settings) to add in your own secret strings from your storage container. 
+* Take note of the `process.env` value being assigned to `connectionstring` in the code below (*Line 3*). Use this [tutorial](https://docs.microsoft.com/en-us/azure/azure-functions/functions-how-to-use-azure-function-app-settings) to add in your own secret strings from your storage container. 
     * The storage container is the one you created when you started your Function App. Navigate to it and find your secret strings here:
     
     ![Indicates where access keys are](https://user-images.githubusercontent.com/69332964/99161798-ba3d7480-26c3-11eb-8e55-eac4bd4cb174.png)
@@ -76,6 +77,7 @@ This is the storage account you created when creating the Function App. If you d
 
 <br />
 
+
 ⬇ **The main block of code**
 * Notice that we are able to name the file with the user's username by receiving it from the header. *Line 10*
    * Later on in the JS, we will send the username in the header of the request.
@@ -84,7 +86,7 @@ This is the storage account you created when creating the Function App. If you d
 * We then call the `uploadBlob()` function explained next *Line 24*
 
 <script src="https://gist.github.com/emsesc/d09a6d7c0caa1318d8e184ebf412c185.js"></script>
-
+<br />
 <br />
 
 ⬇ **Uploading the image blob to the "images" container**
@@ -95,12 +97,15 @@ This is the storage account you created when creating the Function App. If you d
 
 <br />
 
+
 ### Frontend: The "upload" webpage
 Next, I created a static HTML page that will accept the image from the user and send to the Azure Function we just coded using Javascript.
 
 *Note*: I removed unnecessary sections of my code because I wanted to make the webpage ✨*fancy*✨, but you can see the whole thing [here](https://github.com/emsesc/bunnimage/blob/main/upload.html)
 
 <script src="https://gist.github.com/emsesc/faaa81463826cb383110d86071ace146.js"></script>
+<br />
+<br />
 
 **Above we have:**
 * Input box for the username (simple but *insecure* auth system)
