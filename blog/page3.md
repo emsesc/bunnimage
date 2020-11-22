@@ -61,9 +61,8 @@ module.exports = async function (context, req, inputBlob) {
 
 Once again, the "fancy" stuff is omitted. 
 
-<script src="https://gist.github.com/emsesc/f727674180de797ba7c55ebd4124eef0.js"></script>
+{% gist https://gist.github.com/emsesc/f727674180de797ba7c55ebd4124eef0 %}
 
-<br />
 <br />
 
 ⬆**Like we created the "upload" page in Step 1, we now need a "download" page for users to receive the PDF.**
@@ -83,9 +82,8 @@ Time to get bombarded with some *lovely* JS!
 * Change the HTML to display the current status (whether it's looking for the PDF, whether it's ready for download, etc.) *Lines 2-4*
 * Make a request to the HTTP Trigger Function we just coded, sending the username inputted on the HTML page along with it *Lines 9-16*
 
-<script src="https://gist.github.com/emsesc/39f52ee0928f19f709324a1427b9b89f.js"></script>
+{% gist https://gist.github.com/emsesc/39f52ee0928f19f709324a1427b9b89f %}
 
-<br />
 <br />
 
 **Part 2** ⬇:
@@ -95,10 +93,9 @@ Time to get bombarded with some *lovely* JS!
   * **How to do this?** Remove the "Refresh" button *Lines 10-11* and make "Download" visible *Line 9*
 * Set the `onclick` attribute of the "Download" button to call the `getPdf()` function with the unique username + link for download. *Line 8*
   * The `getPdf()` function allows for immediate download with `window.open(link)` *Lines 16-19*
-  
-<script src="https://gist.github.com/emsesc/3eeb6e52e5f8598f226a62e9e809647a.js"></script>
+ 
+{% gist https://gist.github.com/emsesc/3eeb6e52e5f8598f226a62e9e809647a %}
 
-<br />
 <br />
 
 ## Amazing! You're done! 
