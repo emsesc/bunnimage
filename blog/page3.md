@@ -74,7 +74,6 @@ This piece of code creates:
 
 ### Frontend: Downloading the PDF on the Webpage
 
-<!-- Intersperse these comments with your code -->
 Time to get bombarded with some *lovely* JS!
 
 **Part 1** ⬇:
