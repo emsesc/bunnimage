@@ -1,5 +1,7 @@
 # Creating a File Sharing and Conversion Web App with Azure Functions
 
+## By: Emily Chen
+
 If you or someone you know participated in this year's AP Collegeboard Exams, you probably recognize the stress of submitting handwritten work within a small time constraint.
 
 ![https://media.giphy.com/media/3o7TKRwpns23QMNNiE/giphy.gif](https://media.giphy.com/media/3o7TKRwpns23QMNNiE/giphy.gif)
