@@ -1,3 +1,5 @@
+# Creating a File Sharing and Conversion Web App with Azure Functions
+
 If you or someone you know participated in this year's AP Collegeboard Exams, you probably recognize the stress of submitting handwritten work within a small time constraint.
 
 ![https://media.giphy.com/media/3o7TKRwpns23QMNNiE/giphy.gif](https://media.giphy.com/media/3o7TKRwpns23QMNNiE/giphy.gif)
@@ -41,10 +43,10 @@ Click on the "Console" tab in the left panel under "Development Tools".
 
 Inside the console (shown on the right panel), type in the following commands:
 
-`npm init -y`
-[`npm install parse-multipart`](https://www.npmjs.com/package/parse-multipart)
-[`npm install node-fetch`](https://www.npmjs.com/package/node-fetch)
-[`npm install @azure/storage-blob`](https://www.npmjs.com/package/@azure/storage-blob)
+`npm init -y` <br />
+[`npm install parse-multipart`](https://www.npmjs.com/package/parse-multipart) <br />
+[`npm install node-fetch`](https://www.npmjs.com/package/node-fetch) <br />
+[`npm install @azure/storage-blob`](https://www.npmjs.com/package/@azure/storage-blob) <br />
 
 > **Tip**: The Azure Storage Blob client library is going to be a key piece of the project. After all, it's about blobs!
 
